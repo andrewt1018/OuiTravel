@@ -3,7 +3,7 @@
 
 ### Prerequisites
 
-What things you need to install the software and how to install them:
+Things you need to install before running the app:
 
 - Node.js and npm (npm comes with Node.js)
 - MongoDB - Follow the installation guide for your OS.
