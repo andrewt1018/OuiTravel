@@ -18,7 +18,7 @@ A step by step series of examples that tell you how to get a development environ
 1. Clone the repository (if available) or navigate to your backend project directory:
 
 ```bash
-git clone https://github.com/sonha2409/ReaderNation.git
+git clone https://github.com/andrewt1018/OuiTravel.git
 ```
 
 2. Go in to the backend folder
