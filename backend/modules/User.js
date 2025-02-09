@@ -23,6 +23,14 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  resetToken:{
+    type: String, 
+    default: null,
+  },
+  resetExpires: {
+    type: Date,
+    default: null,
+  },
   followerList: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User', // Self-reference for followers
