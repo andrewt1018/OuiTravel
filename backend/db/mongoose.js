@@ -4,10 +4,7 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.ATLAS_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(process.env.ATLAS_URI);
     console.log('Mongoose connection successful');
   } catch (error) {
     console.error(`Connection error: ${error.message}`);

@@ -13,31 +13,22 @@ const mongoClient = new MongoClient(URI);
 const uploadFiles = async (req, res) => {
   try {
     await upload(req, res);
-    console.log(req.files);
 
-    if (req.files.length <= 0) {
+    console.log("Received files:", req.files); // Debugging log
+
+    if (!req.files || req.files.length === 0) {
+      console.error("Upload error: No files received.");
       return res
         .status(400)
-        .send({ message: "You must select at least 1 file." });
+        .json({ message: "You must select at least 1 file." });
     }
 
-    return res.status(200).send({
+    return res.status(200).json({
       message: "Files have been uploaded.",
+      files: req.files,
     });
-
-    // console.log(req.file);
-
-    // if (req.file == undefined) {
-    //   return res.send({
-    //     message: "You must select a file.",
-    //   });
-    // }
-
-    // return res.send({
-    //   message: "File has been uploaded.",
-    // });
   } catch (error) {
-    console.log(error);
+    console.log("Upload error:", error);
 
     if (error.code === "LIMIT_UNEXPECTED_FILE") {
       return res.status(400).send({
@@ -45,12 +36,8 @@ const uploadFiles = async (req, res) => {
       });
     }
     return res.status(500).send({
-      message: `Error when trying upload many files: ${error}`,
+      message: `Error when trying to upload files: ${error}`,
     });
-
-    // return res.send({
-    //   message: "Error when trying upload image: ${error}",
-    // });
   }
 };
 
@@ -59,7 +46,7 @@ const getListFiles = async (req, res) => {
     await mongoClient.connect();
 
     const database = mongoClient.db(process.env.DATABASE);
-    const images = database.collection(process.env.IMG_BUCKET + ".files");
+    const images = database.collection(`${process.env.IMG_BUCKET}.files`);
 
     const cursor = images.find({});
 
