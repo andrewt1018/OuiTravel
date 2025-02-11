@@ -7,12 +7,31 @@ function CreateAccount() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [reenterPass, setReenterPass] = useState('');
+    const [err, setErr] = useState('');
     
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        setErr('');
         // Add your login logic here
         console.log("Username:", username);
         console.log("Password:", password);
+        if (password !== reenterPass) {
+            setErr('Passwords do not match!');
+            return;
+        }
+
+        try {
+            await axios.post('http://localhost:3001/api/auth/register', {
+                username,
+                email,
+                password,
+            });
+            alert('Account created successfully');
+            window.location.href = '/login'; 
+        } catch (error) {
+            console.error(err.message);
+            alert(error);
+        }
       };
 
     return (

@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import "./styles/general.css"
 
-const Landing = () => {
+const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
@@ -42,10 +42,10 @@ const Landing = () => {
             {'Login'}
           </button>
           <p>
-            {"Don't have an account?"} <Link to="/createaccount">{'Create one here'}</Link>.
+            {"Don't have an account?"} <Link to="/create-account">{'Create one here'}</Link>.
           </p>
           <p>
-            {'Forgot your password?'} <Link to="/passwordreset">{'Reset your password'}</Link>.
+            {'Forgot your password?'} <Link to="/password-reset">{'Reset your password'}</Link>.
           </p>
         </form>
       </div>
@@ -53,4 +53,4 @@ const Landing = () => {
   );
 };
 
-export default Landing;
+export default Login;
