@@ -1,9 +1,10 @@
 const express = require("express");
-const dbo = require('./db/conn'); 
+const dbo = require("./db/conn");
 const cors = require("cors");
 
 // Specify all of the backend routes for the server
-const authRoutes = require('./routes/authRoutes');
+const authRoutes = require("./routes/authRoutes");
+const uploadRoutes = require("./routes/uploadRoutes");
 const userRoutes = require('./routes/userRoutes');
 
 const router = express.Router();
@@ -17,14 +18,15 @@ app.use(express.json());
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/images", uploadRoutes);
 app.use("/api/user", userRoutes);
 
 app.listen(PORT, () => {
-    // perform a database connection when server starts
-    dbo.connectToServer(function (err) {
-      if (err) console.error(err);
-     });
-     console.log(`Server is running on http://localhost:${PORT}`);
+  // perform a database connection when server starts
+  dbo.connectToServer(function (err) {
+    if (err) console.error(err);
   });
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
 
 module.exports = router;

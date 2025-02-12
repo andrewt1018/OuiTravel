@@ -1,17 +1,17 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-//hello
-//test commit
 
 import Index from './components/Index.js'
 import Login from './components/Login.js'
+import UploadImage from "./components/UploadImageDemo.js";
 import CreateAccount from './components/CreateAccount.js'
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Index />} />
+        <Route path="/" element={<Landing />} />
+        <Route path="/upload" element={<UploadImage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/create-account" element={<CreateAccount />} />
       </Routes>
