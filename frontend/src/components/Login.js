@@ -1,17 +1,34 @@
 import React, { useState } from "react";
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import "./styles/general.css"
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     // Add your login logic here
     console.log("Username:", username);
     console.log("Password:", password);
+
+    try {
+      const res = await axios.post('http://localhost:3001/api/auth/login', { username, password });
+      console.log(res.data);
+      if (res.data.token) {
+        localStorage.setItem('token', res.data.token);
+        localStorage.setItem('userId', res.data.userId);
+        localStorage.setItem('username', res.data.username);
+        navigate('/');
+      } else {
+      }
+      setUsername('');
+      setPassword('');
+    } catch (error) {
+      console.log("error: " + error);
+    }
   };
 
   return (
@@ -48,7 +65,7 @@ const Login = () => {
             {'Forgot your password?'} <Link to="/password-reset">{'Reset your password'}</Link>.
           </p>
         </form>
-      </div>
+      </div>  
     </div>
   );
 };
