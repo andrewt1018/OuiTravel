@@ -18,14 +18,6 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  resetToken:{
-    type: String, 
-    default: null,
-  },
-  resetExpires: {
-    type: Date,
-    default: null,
-  },
   followerList: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User', // Self-reference for followers
@@ -42,11 +34,6 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User', // Self-reference for following
   }],
-  bio: {
-    type: String,
-    default: "This is my bio.",
-    required: false,
-  },
   followerCount: {
     type: Number,
     default: 0,
@@ -55,19 +42,32 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
-  dob: { 
-    type: Date, 
-    required: false 
-  },  
-  gender: {
-    type: String,
-    enum: ["Male", "Female", "Other"], 
-    required: false,
-  },
-  profilePic: { 
-    type: String,
-    required: false
-  }
+  // bio: {
+  //   type: String,
+  //   default: "This is my bio.",
+  //   required: false,
+  // },
+  // resetToken:{
+  //   type: String, 
+  //   default: null,
+  // },
+  // resetExpires: {
+  //   type: Date,
+  //   default: null,
+  // },
+  // dob: { 
+  //   type: Date, 
+  //   required: false 
+  // },  
+  // gender: {
+  //   type: String,
+  //   enum: ["M", "F", "Other"], 
+  //   required: false,
+  // },
+  // profilePic: { 
+  //   type: String,
+  //   required: false
+  // }
 });
 
 // Pre-save middleware to hash the password

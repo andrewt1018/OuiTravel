@@ -13,7 +13,11 @@ require("dotenv").config({ path: "../config.env" });
 const { google } = require("googleapis");
 const OAuth2 = google.auth.OAuth2;
 
+
 const router = express.Router();
+
+connectDB();
+
 const verifyToken = (req, res, next) => {
     const token = req.headers['x-access-token'];
     if (!token) {
