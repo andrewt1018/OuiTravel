@@ -3,7 +3,7 @@ const dbo = require("./db/conn");
 const cors = require("cors");
 
 // Specify all of the backend routes for the server
-const authRoutes = require("./routes/authRoutes");
+const authRoutes = require('./routes/authRoutes');
 const uploadRoutes = require("./routes/uploadRoutes");
 const userRoutes = require('./routes/userRoutes');
 
