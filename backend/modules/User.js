@@ -42,32 +42,44 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
-  // bio: {
-  //   type: String,
-  //   default: "This is my bio.",
-  //   required: false,
-  // },
-  // resetToken:{
-  //   type: String, 
-  //   default: null,
-  // },
-  // resetExpires: {
-  //   type: Date,
-  //   default: null,
-  // },
-  // dob: { 
-  //   type: Date, 
-  //   required: false 
-  // },  
-  // gender: {
-  //   type: String,
-  //   enum: ["M", "F", "Other"], 
-  //   required: false,
-  // },
-  // profilePic: { 
-  //   type: String,
-  //   required: false
-  // }
+  bio: {
+    type: String,
+    default: "This is my bio.",
+    required: false,
+  },
+  resetToken:{
+    type: String, 
+    default: null,
+  },
+  resetExpires: {
+    type: Date,
+    default: null,
+  },
+  dob: { 
+    type: Date, 
+    required: false 
+  },  
+  gender: {
+    type: String,
+    enum: ["M", "F", "Other"], 
+    required: false,
+  },
+  profilePic: { 
+    type: String,
+    required: false
+  },
+  journals: [{
+    type: Journal,
+    required: false
+  }],
+  wishlist: [{
+    type: Location,
+    required: false
+  }],
+  icons: [{
+    type: String,
+    required: false
+  }]
 });
 
 // Pre-save middleware to hash the password
