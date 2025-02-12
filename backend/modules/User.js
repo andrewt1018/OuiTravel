@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
 const preferencesSchema = new mongoose.Schema({
-  
+
 })
 
 // Define the User schema
@@ -69,7 +69,7 @@ const userSchema = new mongoose.Schema({
   },
   profilePic: { 
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Image"
+    ref: "photo.files"
   },
   journals: [{
     type: mongoose.Schema.Types.ObjectId,
@@ -81,11 +81,16 @@ const userSchema = new mongoose.Schema({
   }],
   icons: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Image"
+    ref: "photo.files"
   }],
   preferences: {
     type: preferencesSchema,
     default: null
+  },
+  visibility: {
+    type: String,
+    enum: ["Public", "Private"],
+    default: "Private"
   }
 });
 
