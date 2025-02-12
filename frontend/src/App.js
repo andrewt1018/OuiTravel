@@ -1,8 +1,10 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
-import Landing from "./components/Landing.js";
+import Index from './components/Index.js'
+import Login from './components/Login.js'
 import UploadImage from "./components/UploadImageDemo.js";
+import CreateAccount from './components/CreateAccount.js'
 
 function App() {
   return (
@@ -10,6 +12,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/upload" element={<UploadImage />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/create-account" element={<CreateAccount />} />
       </Routes>
     </Router>
   );

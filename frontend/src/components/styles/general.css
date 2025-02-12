@@ -1,0 +1,33 @@
+.main {
+    position: relative;
+    margin: 0 auto;
+    height: 100%;
+    width: 100%;
+}
+
+.title {
+    position: relative;
+    margin: 0 auto;
+    text-align: center;
+    font-size: 30px;
+    padding: 10px;
+}
+
+.wrapper {
+    position: relative;
+    margin: 0 auto;
+    text-align: center;
+    overflow: auto;
+}
+
+.usernameInput {
+    padding-bottom: 10px;
+}
+
+.passwordInput {
+    padding-bottom: 10px;
+}
+
+.inputs {
+    width: 150px;
+}
