@@ -16,13 +16,15 @@ const router = express.Router();
 
 connectDB()
 router.post('/register', async (req, res) => {
-    const { username, email, password } = req.body;
+    const { username, email, password, dob, gender } = req.body;
   
     try {
       const newUser = new User({
         username,
         email,
         password,
+        dob,
+        gender
       });
   
       const savedUser = await newUser.save();
@@ -68,7 +70,7 @@ const sendResetEmail = async (email, retoken, res) => {
     subject: 'OuiTravel - Password Reset Link',
     html: `
         <p>To reset your password, please click on the following link, or paste it into your browser within 15 minutes of receiving:</p>
-        <a href="http://localhost:3001/api/auth/reset/${retoken}">Reset Password</a>
+        <a href="http://localhost:3000/reset-password/${retoken}">Reset Password</a>
         <p>If you did not request a password reset, please ignore this email.</p>
       `
   };
@@ -109,34 +111,53 @@ router.post('/reset-password', async (req, res) => {
   }
 });
 
+/* Verify token before resetting password */
+router.get('/reset-token-verify/:token', async (req, res) => {
 
+  const { token } = req.params;
+
+  try {
+    const user = await User.findOne({ resetToken: token, resetExpires: { $gt: Date.now()} });
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired reset token '});
+    }
+    res.status(200).json({ message: 'Valid token' });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: 'Error verifying token' });
+
+  }
+});
 
 /* Password Reset */
-router.post('/reset/:token', async(req, res) => {
+router.post('/reset-password/:token', async(req, res) => {
 
-    const { token } = req.params;
-    const { newPassword } = req.body;
+  const { token } = req.params;
+  const { newPass } = req.body;
 
-    try {
-      const user = await User.findOne({ resetToken: token, resetExpires: { $gt: Date.now() } });
-      if (!user) {
-        return res.status(400).json({ message: 'Password reset token is invalid or has expired.' });
-      }
-
-      // Hashed new password before updating in the database
-      // const hashedPassword = await bcrypt.hash(newPassword, 10);
-      user.password = hashedPassword;
-      user.resetToken = undefined;
-      user.resetExpires = undefined;
-      await user.save();
-
-      res.status(200).json({ message: 'Password has been reset successfully' });
-
-    } catch (error) {
-      console.log(error);
-      res.status(500).json({ message: 'Error resetting password' });
+  try {
+    const user = await User.findOne({ resetToken: token, resetExpires: { $gt: Date.now() } });
+    if (!user) {
+      return res.status(400).json({ message: 'Password reset token is invalid or has expired.' });
     }
+
+    // Hashed new password before updating in the database
+    // const hashedPassword = await bcrypt.hash(newPassword, 10);
+    // user.password = hashedPassword;
+    user.password = newPass;
+
+    await user.save();
+    user.resetToken = undefined;
+    user.resetExpires = undefined;
+
+    res.status(200).json({ message: 'Password has been reset successfully' });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: 'Error resetting password' });
+  }
 });
+
 
 
 

@@ -59,7 +59,36 @@ const userSchema = new mongoose.Schema({
   followingCount: {
     type: Number,
     default: 0,
+  },
+  dob: { 
+    type: Date, 
+    required: true 
+  },  
+  gender: {
+    type: String,
+    enum: ["Male", "Female", "Other"], 
+    required: true,
+  },
+  profilePic: { 
+    type: String 
+  }, 
+  preferences: {
+    destinations: { type: [String], default: [] },
+    activities: { type: [String], default: [] }, 
+    cuisines: { type: [String], default: [] }, 
+    transportation: { 
+      type: String, 
+      enum: ['Car', 'Public Transport', 'Bike', 'Walking', 'Prefer not to specify'], 
+      default: 'Prefer not to specify' 
+    },
+    lodging: { 
+      type: String, 
+      enum: ['Hotel', 'Hostel', 'Airbnb', 'Camping', 'Prefer not to specify'], 
+      default: 'Prefer not to specify' 
+    }
   }
+
+
 });
 
 const User = mongoose.model('User', userSchema);
