@@ -4,12 +4,6 @@ const bcrypt = require('bcrypt');
 
 // Define the User schema
 const userSchema = new mongoose.Schema({
-  userid: {
-    type: String,
-    required: true,
-    unique: true,
-    default: uuidv4 // Automatically generate a UUID for each user
-  },
   email: {
     type: String, 
     required: true,
@@ -51,7 +45,7 @@ const userSchema = new mongoose.Schema({
   bio: {
     type: String,
     default: "This is my bio.",
-    required: true,
+    required: false,
   },
   followerCount: {
     type: Number,
@@ -63,33 +57,17 @@ const userSchema = new mongoose.Schema({
   },
   dob: { 
     type: Date, 
-    required: true 
+    required: false 
   },  
   gender: {
     type: String,
     enum: ["Male", "Female", "Other"], 
-    required: true,
+    required: false,
   },
   profilePic: { 
-    type: String 
-  }, 
-  preferences: {
-    destinations: { type: [String], default: [] },
-    activities: { type: [String], default: [] }, 
-    cuisines: { type: [String], default: [] }, 
-    transportation: { 
-      type: String, 
-      enum: ['Car', 'Public Transport', 'Bike', 'Walking', 'Prefer not to specify'], 
-      default: 'Prefer not to specify' 
-    },
-    lodging: { 
-      type: String, 
-      enum: ['Hotel', 'Hostel', 'Airbnb', 'Camping', 'Prefer not to specify'], 
-      default: 'Prefer not to specify' 
-    }
+    type: String,
+    required: false
   }
-
-
 });
 
 // Pre-save middleware to hash the password
