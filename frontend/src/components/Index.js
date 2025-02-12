@@ -7,17 +7,16 @@ const Index = () => {
     const navigate = useNavigate()
     useEffect(() => {
         async function getUser() {
-            console.log("In async function");
+            console.log("In useEffect");
             const token = localStorage.getItem('token');
-            const res = await axios.get('http://localhost:3001/api/user/get-user', {
-                headers: { 'x-access-token': `${token}` }
-              });
-            if (!res) {
-                alert("User not logged in!");
+            try {
+                const res = await axios.get('http://localhost:3001/api/user/get-user', {
+                    headers: { 'x-access-token': `${token}` } });   
+                setUsername(res.data.message);
+            } catch (error) {
+                alert("User not logged in!")
                 navigate("/login");
             }
-            console.log(res);
-            setUsername(res.data.message);
         }
         getUser()
       });

@@ -24,7 +24,11 @@ const Login = () => {
       setUsername('');
       setPassword('');
     } catch (error) {
-      console.log("error: " + error);
+      if (error.response && error.response.data && error.response.data.message) {
+        alert(error.response.data.message);
+      } else {
+        console.log("Error: " + error);
+      }
     }
   };
 

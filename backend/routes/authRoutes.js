@@ -45,13 +45,13 @@ router.post('/login', async (req, res) => {
     try {
         // Attempt to find the user in the database
         const user = await dbConnect.collection("users").findOne({ username });
-        console.log("User:", user.username)
         // Validate user exists and password is correct
         if (!user) {
-            return res.status(500).send("User doesn't exist!");
+            return res.status(500).json( {message: "User doesn't exist!"} );
         } else if(!(await bcrypt.compare(password, user.password))) {
-            return res.status(500).send('Passowrd incorrect.');
+            return res.status(500).json( {message: 'Password incorrect.'} );
         }
+        console.log("User logging in:", user.username)
 
         // Create a JWT
         const token = jwt.sign({ id: user._id }, 'your-secret-key', { expiresIn: '5m' });
@@ -62,7 +62,7 @@ router.post('/login', async (req, res) => {
     } catch (error) {
         // Log and respond with error
         console.error(error);
-        res.status(500).send('An error occurred during the login process.');
+        res.status(500).json( {message: 'An error occurred during the login process.'} );
     }
 });
 
