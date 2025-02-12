@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
-const { v4: uuidv4 } = require('uuid');
 const bcrypt = require('bcrypt');
+
+const preferencesSchema = new mongoose.Schema({
+
+})
 
 // Define the User schema
 const userSchema = new mongoose.Schema({
@@ -42,38 +45,66 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
-  // bio: {
-  //   type: String,
-  //   default: "This is my bio.",
-  //   required: false,
-  // },
-  // resetToken:{
-  //   type: String, 
-  //   default: null,
-  // },
-  // resetExpires: {
-  //   type: Date,
-  //   default: null,
-  // },
-  // dob: { 
-  //   type: Date, 
-  //   required: false 
-  // },  
-  // gender: {
-  //   type: String,
-  //   enum: ["M", "F", "Other"], 
-  //   required: false,
-  // },
-  // profilePic: { 
-  //   type: String,
-  //   required: false
-  // }
+  bio: {
+    type: String,
+    default: "This is my bio.",
+    required: false,
+  },
+  resetToken:{
+    type: String, 
+    default: null,
+  },
+  resetExpires: {
+    type: Date,
+    default: null,
+  },
+  dob: { 
+    type: Date, 
+    required: false 
+  },  
+  gender: {
+    type: String,
+    enum: ["M", "F", "Other"], 
+    required: false,
+  },
+  profilePic: { 
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "photo.files"
+  },
+  wishlist: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Location"
+  }],
+  icons: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "photo.files"
+  }],
+  preferences: {
+    type: preferencesSchema,
+    default: null
+  },
+  visibility: {
+    type: String,
+    enum: ["Public", "Private"],
+    default: "Private"
+  },
+  reviews: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Review"
+  }],
+  journals: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Journal"
+  }],
+  itineraries: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Itinerary"
+  }]
 });
 
 // Pre-save middleware to hash the password
 userSchema.pre('save', async function (next) {
   // if (!this.isModified('password')) return next(); // Only hash if the password is new/modified
-
   try {
     const saltRounds = 10; // Recommended value
     const salt = await bcrypt.genSalt(saltRounds);

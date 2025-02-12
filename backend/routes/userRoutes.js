@@ -4,6 +4,7 @@ const dbo = require('../db/conn');
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
+
 const User = require('../modules/User');
 
 const router = express.Router();
@@ -27,6 +28,8 @@ const verifyToken = (req, res, next) => {
     });
   };
 
+/* Get user */
+/* Used to verify the current user's JWT token (to ensure they're logged in) */
 router.get('/get-user', verifyToken, async (req, res) => {
     const userId = req.user.id;
     try {
@@ -76,7 +79,6 @@ router.post('/edit-profile', async (req, res) => {
 
 });
 
-
 /* Edit Preferences */
 router.post('/preferences', async (req, res) => {
 
@@ -106,7 +108,6 @@ router.post('/preferences', async (req, res) => {
         return res.status(500).json({ message: 'Error updating preferences' });
     }
 });
-
 
 
 module.exports = router;
