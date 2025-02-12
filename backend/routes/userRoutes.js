@@ -3,21 +3,21 @@ const connectDB = require('../db/mongoose');
 const dbo = require('../db/conn');
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
-
+const jwt = require('jsonwebtoken');
 const User = require('../modules/User');
 
 const router = express.Router();
 
 const verifyToken = (req, res, next) => {
+    console.log("Verifying token")
     const token = req.headers['x-access-token'];
     if (!token) {
       return res.status(403).send({ message: 'No token provided.' });
     }
   
     jwt.verify(token, 'your-secret-key', (err, decoded) => {
-      console.log("Verifying token");
       if (err) {
-        console.log("verifying token failed");
+        console.log("Verifying token failed");
         return res.status(403).send({ message: 'Unauthorized' });
       }
       // if everything good, save to request for use in other routes
@@ -27,16 +27,17 @@ const verifyToken = (req, res, next) => {
     });
   };
 
-router.post('/get-user', verifyToken, async (req, res) => {
+router.get('/get-user', verifyToken, async (req, res) => {
     const userId = req.user.id;
-    console.log("User ID: " + userId);
     try {
         // Check if the user ID passed in is valid or not
-        const existingUser = await dbConnect.collection("users").findOne( { _id: new ObjectId(userId) } );
-        console.log(existingUser);
+        const existingUser = await User.findById(userId)
         if (!(existingUser)) {
-          return res.status(500).send('Invalid user!');
+            console.log("User does not exist")
+            return res.status(500).send('Invalid user!');
         }
+        console.log("Got user:", existingUser.username);
+        return res.status(201).send({message :existingUser.username});
     } catch (error) {
         return res.status(500).send("Error getting user");
     }
