@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const { v4: uuidv4 } = require('uuid');
 const bcrypt = require('bcrypt');
 
 // Define the User schema
@@ -65,27 +64,26 @@ const userSchema = new mongoose.Schema({
     required: false,
   },
   profilePic: { 
-    type: String,
-    required: false
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Image"
   },
   journals: [{
-    type: Journal,
-    required: false
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Journal"
   }],
   wishlist: [{
-    type: Location,
-    required: false
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Location"
   }],
   icons: [{
-    type: String,
-    required: false
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Image"
   }]
 });
 
 // Pre-save middleware to hash the password
 userSchema.pre('save', async function (next) {
   // if (!this.isModified('password')) return next(); // Only hash if the password is new/modified
-
   try {
     const saltRounds = 10; // Recommended value
     const salt = await bcrypt.genSalt(saltRounds);
