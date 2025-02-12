@@ -4,6 +4,7 @@ const dbo = require('../db/conn');
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
+
 const User = require('../modules/User');
 
 const router = express.Router();

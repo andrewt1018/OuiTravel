@@ -71,10 +71,6 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "photo.files"
   },
-  journals: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Journal"
-  }],
   wishlist: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "Location"
@@ -91,7 +87,19 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ["Public", "Private"],
     default: "Private"
-  }
+  },
+  reviews: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Review"
+  }],
+  journals: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Journal"
+  }],
+  itineraries: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Itinerary"
+  }]
 });
 
 // Pre-save middleware to hash the password
