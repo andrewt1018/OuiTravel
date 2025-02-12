@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
+const preferencesSchema = new mongoose.Schema({
+  
+})
+
 // Define the User schema
 const userSchema = new mongoose.Schema({
   email: {
@@ -78,7 +82,11 @@ const userSchema = new mongoose.Schema({
   icons: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "Image"
-  }]
+  }],
+  preferences: {
+    type: preferencesSchema,
+    default: null
+  }
 });
 
 // Pre-save middleware to hash the password
