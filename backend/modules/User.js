@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { v4: uuidv4 } = require('uuid');
+const bcrypt = require('bcrypt');
 
 // Define the User schema
 const userSchema = new mongoose.Schema({
@@ -51,6 +52,20 @@ const userSchema = new mongoose.Schema({
   followingCount: {
     type: Number,
     default: 0,
+  }
+});
+
+// Pre-save middleware to hash the password
+userSchema.pre('save', async function (next) {
+  // if (!this.isModified('password')) return next(); // Only hash if the password is new/modified
+
+  try {
+    const saltRounds = 10; // Recommended value
+    const salt = await bcrypt.genSalt(saltRounds);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (err) {
+    next(err);
   }
 });
 
