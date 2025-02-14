@@ -1,27 +1,25 @@
 import {React, useEffect, useState} from "react";
-import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import {getUser} from './helpers/user-verification'
 
 const Index = () => {
     const [username, setUsername] = useState('');
     const navigate = useNavigate()
-    useEffect(() => {
-        async function getUser() {
-            console.log("In useEffect");
-            const token = localStorage.getItem('token');
-            try {
-                const res = await axios.get('http://localhost:3001/api/user/get-user', {
-                    headers: { 'x-access-token': `${token}` } });   
-                setUsername(res.data.message);
-            } catch (error) {
+
+    useEffect( () => {
+        const verifyUser = async () => {
+            const resp = await getUser();
+            if (resp) {
+                setUsername(resp.username);
+            } else {
                 alert("User not logged in!")
-                navigate("/login");
+                navigate("/login")
             }
         }
-        getUser()
-      });
+        verifyUser()
+      }, []);
 
-    return (
+    return username ? (
         <div>
             <p>Hello {username}!</p>
             <Link 
@@ -31,6 +29,8 @@ const Index = () => {
             Go to your profile
             </Link>
         </div>
+    ) : (
+        <></>
     );
 };
 

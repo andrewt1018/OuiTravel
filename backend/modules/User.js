@@ -5,6 +5,27 @@ const preferencesSchema = new mongoose.Schema({
 
 })
 
+const positionSchema = new mongoose.Schema({
+  lat: {
+    type: Number,
+    required: true
+  },
+  lng: {
+    type: Number,
+    required: true
+  }
+})
+
+const iconSchema = new mongoose.Schema({
+  position: {
+    type: positionSchema,
+    required: true
+  },
+  char: {
+    type: String,
+  }
+})
+
 // Define the User schema
 const userSchema = new mongoose.Schema({
   email: {
@@ -75,13 +96,11 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Location"
   }],
-  icons: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "photo.files"
+  savedIcons: [{
+    type: iconSchema
   }],
   preferences: {
     type: preferencesSchema,
-    default: null
   },
   visibility: {
     type: String,
@@ -104,7 +123,7 @@ const userSchema = new mongoose.Schema({
 
 // Pre-save middleware to hash the password
 userSchema.pre('save', async function (next) {
-  // if (!this.isModified('password')) return next(); // Only hash if the password is new/modified
+  if (!this.isModified('password')) return next(); // Only hash if the password is new/modified
   try {
     const saltRounds = 10; // Recommended value
     const salt = await bcrypt.genSalt(saltRounds);
