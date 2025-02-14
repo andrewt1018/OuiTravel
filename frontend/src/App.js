@@ -7,6 +7,7 @@ import Index from './components/Index.js'
 import Login from './components/Login.js'
 import UploadImage from "./components/UploadImageDemo.js";
 import CreateAccount from './components/CreateAccount.js'
+import Profile from './components/Profile.js'
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/upload" element={<UploadImage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/create-account" element={<CreateAccount />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
     </Router>
   );
