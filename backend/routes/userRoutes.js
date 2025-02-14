@@ -61,7 +61,7 @@ router.post('/save-icon', verifyToken, async (req, res) => {
                 lat: marker.position.lat,
                 lng: marker.position.lng
             },
-            char: "⭐️",
+            char: "⭐️ 9.8",
             _id: new ObjectId()
         }
         await dbConnect.collection("users").updateOne(

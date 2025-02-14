@@ -23,7 +23,6 @@ const iconSchema = new mongoose.Schema({
   },
   char: {
     type: String,
-    default: "⭐️"
   }
 })
 

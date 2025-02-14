@@ -8,6 +8,7 @@ import Login from './components/Login.js'
 import UploadImage from "./components/UploadImageDemo.js";
 import CreateAccount from './components/CreateAccount.js';
 import MyMap from './components/TestMap.js';
+import MyComponent from './components/helpers/search-bar.js'
 
 function App() {
   return (

@@ -4,12 +4,13 @@ import React, { useState, useLayoutEffect, useEffect } from "react";
 import axios from "axios"
 import {getUser} from "./helpers/user-verification"
 import { useNavigate } from 'react-router-dom';
+import SearchBar from './helpers/search-bar'
 import {
-  APIProvider,
-  Map,
-  AdvancedMarker,
-  Pin,
-  InfoWindow,
+    APIProvider,
+    Map,
+    AdvancedMarker,
+    useMapsLibrary,
+    InfoWindow,
 } from "@vis.gl/react-google-maps";
 
 function MyMap() {
@@ -130,7 +131,6 @@ function MyMap() {
                     onClick={onMapClick}
                     fullscreenControl={false}
                     >
-
                     {/* <SavedMarkers 
                         savedIcons={savedIcons} /> */}
                     {savedIcons && savedIcons.map(icon => (
@@ -158,6 +158,11 @@ function MyMap() {
                             }}
                         >
                                 <div>
+                                    <p>
+                                        ASDLKFJAS;LDKFJA;SLDKFJAS;LDKFJA;SLDKJFA;SLJFAS;KLDJFSAD;FSL
+                                    </p>
+                                    <br />
+                                    <br /><br /><br />
                                     <button
                                         type="submit"
                                         className={`w-full py-3 px-4 inline-flex justify-center items-center gap-2 rounded-md border border-transparent font-semibold bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all text-sm`}
@@ -171,6 +176,9 @@ function MyMap() {
                 </Map>
             </div>
             </APIProvider>
+            <div>
+                <SearchBar />
+            </div>
             <div>
                 <p>Number of icons: {savedIcons.length}</p>
             </div>
