@@ -9,6 +9,8 @@ import UploadImage from "./components/UploadImageDemo.js";
 import CreateAccount from './components/CreateAccount.js';
 import MyMap from './components/TestMap.js';
 import MyComponent from './components/helpers/search-bar.js'
+import CreateAccount from './components/CreateAccount.js'
+import Profile from './components/Profile.js'
 
 function App() {
   return (
@@ -21,6 +23,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/create-account" element={<CreateAccount />} />
         <Route path="/my-map" element={<MyMap />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
     </Router>
   );

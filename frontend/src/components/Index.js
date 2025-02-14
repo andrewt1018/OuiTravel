@@ -22,6 +22,12 @@ const Index = () => {
     return username ? (
         <div>
             <p>Hello {username}!</p>
+            <Link 
+                to={`/profile`} 
+                className="text-blue-600 hover:underline"
+            >
+            Go to your profile
+            </Link>
         </div>
     ) : (
         <></>
