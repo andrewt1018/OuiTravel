@@ -6,9 +6,7 @@ import ResetPassword from './components/ResetPassword.js';
 import Index from './components/Index.js'
 import Login from './components/Login.js'
 import UploadImage from "./components/UploadImageDemo.js";
-import CreateAccount from './components/CreateAccount.js';
 import MyMap from './components/TestMap.js';
-import MyComponent from './components/helpers/search-bar.js'
 import CreateAccount from './components/CreateAccount.js'
 import Profile from './components/Profile.js'
 
