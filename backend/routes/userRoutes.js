@@ -46,6 +46,23 @@ router.get('/get-user', verifyToken, async (req, res) => {
     }
 });
 
+/* Get user data */
+/* Used to verify the current user's JWT token (to ensure they're logged in) */
+router.get('/get-userdata', verifyToken, async (req, res) => {
+    const userId = req.user.id;
+    try {
+        // Check if the user ID passed in is valid or not
+        const existingUser = await User.findById(userId)
+        if (!(existingUser)) {
+            console.log("User does not exist")
+            return res.status(500).send('Invalid user!');
+        }
+        return res.status(201).send({message :existingUser});
+    } catch (error) {
+        return res.status(500).send("Error getting user");
+    }
+});
+
 /* Edit Profile */
 // edit their bio, DoB, gender, profile picture, and other details. 
 router.post('/edit-profile', async (req, res) => {
