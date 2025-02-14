@@ -124,7 +124,7 @@ const userSchema = new mongoose.Schema({
 
 // Pre-save middleware to hash the password
 userSchema.pre('save', async function (next) {
-  // if (!this.isModified('password')) return next(); // Only hash if the password is new/modified
+  if (!this.isModified('password')) return next(); // Only hash if the password is new/modified
   try {
     const saltRounds = 10; // Recommended value
     const salt = await bcrypt.genSalt(saltRounds);

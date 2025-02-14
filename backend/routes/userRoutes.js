@@ -60,7 +60,9 @@ router.post('/save-icon', verifyToken, async (req, res) => {
             position: {
                 lat: marker.position.lat,
                 lng: marker.position.lng
-            }
+            },
+            char: "⭐️",
+            _id: new ObjectId()
         }
         await dbConnect.collection("users").updateOne(
             {_id: ObjectId.createFromHexString(userId)},
@@ -68,6 +70,7 @@ router.post('/save-icon', verifyToken, async (req, res) => {
               savedIcons: newIcon
             }}
           );
+        return res.status(201).json( {newIcon: newIcon} )
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: 'Cannot save icon.' });
@@ -92,8 +95,6 @@ router.post('/edit-profile', async (req, res) => {
             user.gender = newGender;
         }
         if (newProfilePic) user.profilePic = newProfilePic;
-
-         
         await user.save();
 
         return res.status(200).json({ message: 'User Profile updated successfully '});

@@ -32,7 +32,11 @@ function MyMap() {
         console.log("Unable to retrieve your location");
     }
 
-    useLayoutEffect(() => {
+    useEffect(() => {
+        console.log("Saved icons:", savedIcons)
+    }, [savedIcons])
+
+    useEffect(() => {
          /** Verify user first */
          const verifyUser = async () => {
             const user = await getUser();
@@ -45,7 +49,7 @@ function MyMap() {
             setSavedIcons(user.savedIcons);
         }
         verifyUser();
-        console.log("Saved icons: ", savedIcons);
+
         /** Get's the user's current location */
         if (navigator.geolocation) {
             if (navigator.geolocation) {
@@ -81,9 +85,13 @@ function MyMap() {
         }
         try {
             const token = localStorage.getItem("token");
-            await axios.post('http://localhost:3001/api/user/save-icon', { marker },
+            const ret = await axios.post('http://localhost:3001/api/user/save-icon', { marker },
                 {headers: { 'x-access-token': `${token}`}});
-            console.log("Successfully saved!")
+            console.log("Successfully saved icon!")
+            console.log(ret)
+            setSavedIcons(savedIcons => [...savedIcons, ret.data.newIcon])
+            setOpenInfo(false);
+            setMarker(null);
         } catch (error) {
             if (error.response.status === 403) {
                 alert("User is not logged in!")
@@ -100,9 +108,9 @@ function MyMap() {
 
     function SavedMarkers(props) {
         return (
-            props.savedIcons.map((icon, index) => (
+            props.savedIcons.map((icon) => (
                 <AdvancedMarker
-                    key={index}
+                    key={icon._id}
                     position={icon.position}
                 >
                     <span style={{fontSize:"2rem"}}>{icon.char}</span>
@@ -111,8 +119,6 @@ function MyMap() {
         )
     }
 
-    console.log("CurrLoc:", currLocation)
-    console.log("Saved icons:", savedIcons)
     return currLocation ? (
         <div style={{ height: "100vh", width: "100vw" }}>
             <APIProvider apiKey={process.env.REACT_APP_GOOGLE_API_KEY}>
@@ -124,8 +130,17 @@ function MyMap() {
                     onClick={onMapClick}
                     fullscreenControl={false}
                     >
-                    
-                    {savedIcons && <SavedMarkers savedIcons={savedIcons}/>}
+
+                    {/* <SavedMarkers 
+                        savedIcons={savedIcons} /> */}
+                    {savedIcons && savedIcons.map(icon => (
+                        <AdvancedMarker
+                            key={icon._id}
+                            position={icon.position}
+                        >
+                            <span style={{fontSize:"2rem"}}>{icon.char}</span>
+                        </AdvancedMarker>
+                    ))}
 
                     {marker && (
                         <AdvancedMarker
@@ -156,6 +171,9 @@ function MyMap() {
                 </Map>
             </div>
             </APIProvider>
+            <div>
+                <p>Number of icons: {savedIcons.length}</p>
+            </div>
         </div>
     ) : (
         <div>Retrieving your location ...</div>
