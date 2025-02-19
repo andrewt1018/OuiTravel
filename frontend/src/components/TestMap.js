@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useLayoutEffect, useEffect } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import axios from "axios"
 import {getUser} from "./helpers/user-verification"
 import { useNavigate } from 'react-router-dom';
@@ -18,6 +18,7 @@ function MyMap() {
     const [marker, setMarker] = useState(null);
     const [openInfo, setOpenInfo] = useState(false);
     const [savedIcons, setSavedIcons] = useState([]);
+    const [mapCenter, setMapCenter] = useState(null);
     const navigate = useNavigate();
 
     function getLocationSuccess(position) {
@@ -32,10 +33,6 @@ function MyMap() {
     function getLocationError() {
         console.log("Unable to retrieve your location");
     }
-
-    useEffect(() => {
-        console.log("Saved icons:", savedIcons)
-    }, [savedIcons])
 
     useEffect(() => {
          /** Verify user first */
@@ -107,18 +104,9 @@ function MyMap() {
         }
     }
 
-    function SavedMarkers(props) {
-        return (
-            props.savedIcons.map((icon) => (
-                <AdvancedMarker
-                    key={icon._id}
-                    position={icon.position}
-                >
-                    <span style={{fontSize:"2rem"}}>{icon.char}</span>
-                </AdvancedMarker>
-            ))
-        )
-    }
+    const handleCameraChange = useCallback((e) => {
+        setMapCenter(e.detail.center);
+      });
 
     return currLocation ? (
         <div style={{ height: "100vh", width: "100vw" }}>
@@ -130,6 +118,8 @@ function MyMap() {
                     mapId={process.env.REACT_APP_PERSONAL_MAP_ID}
                     onClick={onMapClick}
                     fullscreenControl={false}
+                    onCameraChanged={handleCameraChange}
+                    reuseMaps={true}
                     >
                     {/* <SavedMarkers 
                         savedIcons={savedIcons} /> */}
@@ -159,7 +149,7 @@ function MyMap() {
                         >
                                 <div>
                                     <p>
-                                        ASDLKFJAS;LDKFJA;SLDKFJAS;LDKFJA;SLDKJFA;SLJFAS;KLDJFSAD;FSL
+                                        Save icon!
                                     </p>
                                     <br />
                                     <br /><br /><br />
@@ -182,6 +172,15 @@ function MyMap() {
             <div>
                 <p>Number of icons: {savedIcons.length}</p>
             </div>
+            {mapCenter ? 
+            <div>
+                <p>Map center: ({mapCenter.lat.toFixed(5)}, {mapCenter.lng.toFixed(5)})</p>
+            </div> 
+            :
+            <div>
+                <p>Map center has not been set.</p>
+            </div>
+            }
         </div>
     ) : (
         <div>Retrieving your location ...</div>
