@@ -85,7 +85,7 @@ const NavigationLayout = ({ children, showHeader = false, headerSearchBar = null
           {/* Settings at bottom */}
           <div>
             <Link 
-              to="/settings"
+              to=""
               className={navLinkStyles}
             >
               <span className="min-w-[24px]">
