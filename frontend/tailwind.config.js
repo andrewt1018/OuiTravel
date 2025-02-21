@@ -10,8 +10,8 @@ module.exports = {
         'margin': 'margin',
       },
       width: {
-        'sidebar-expanded': '16rem',  // 256px
-        'sidebar-collapsed': '4.5rem',   // 64px
+        'sidebar-expanded': '16rem',
+        'sidebar-collapsed': '4.5rem',
       },
       margin: {
         'sidebar-expanded': '16rem',
