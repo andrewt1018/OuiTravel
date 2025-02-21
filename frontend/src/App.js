@@ -9,7 +9,7 @@ import UploadImage from "./components/UploadImageDemo.js";
 import MyMap from './components/MyMap.js';
 import CreateAccount from './components/CreateAccount.js'
 import Profile from './components/Profile.js'
-import NavigationLayout from './components/NavigationLayout';
+import NavigationLayout from './components/helpers/NavigationLayout.js';
 
 function App() {
   return (
