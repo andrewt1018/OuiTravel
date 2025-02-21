@@ -12,6 +12,7 @@ import Profile from './components/Profile.js';
 import MessagePage from './components/MessagePage.js';
 import EditProfile from './components/EditProfile.js';
 import NavigationLayout from './components/helpers/NavigationLayout.js';
+import LocationOverlay from './components/helpers/LocationOverlay.js';
 import IndexSearchBar from './components/helpers/IndexSearchBar';
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
         <Route path="/reset-password" element={<ResetPasswordPrompt/>} />
         <Route path="/reset-password/:token" element={<ResetPassword/>} />
         <Route path="/upload" element={<UploadImage />} />
+        <Route path="/location-overlay" element={<LocationOverlay />} />
 
         {/* Routes with navigation */}
         <Route path="/" element={
