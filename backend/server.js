@@ -6,9 +6,11 @@ const cors = require("cors");
 const authRoutes = require('./routes/authRoutes');
 const uploadRoutes = require("./routes/uploadRoutes");
 const userRoutes = require('./routes/userRoutes');
+const messageRoutes = require('./routes/messageRoutes');
 
 const router = express.Router();
 const app = express();
+// const { app, server } = require("./lib/socket.js");
 require("dotenv").config({ path: "./config.env" });
 
 const PORT = process.env.PORT;
@@ -20,6 +22,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/images", uploadRoutes);
 app.use("/api/user", userRoutes);
+app.use("/api/message", messageRoutes);
 
 app.listen(PORT, () => {
   // perform a database connection when server starts

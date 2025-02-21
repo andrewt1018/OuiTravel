@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import "./styles/general.css"
 
@@ -6,11 +7,16 @@ export default function UserProfile() {
   const [userData, setUserData] = useState({});
   const [menuOpen, setMenuOpen] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
+  const navigate = useNavigate();
 
   const handleFollow = () => {
     setIsFollowing(!isFollowing);
     // backend not implemented
   };
+
+  const handleEditProfile = () => {
+    navigate('/edit-profile');
+  }
 
   useEffect(() => {
     async function getUserData() {
@@ -43,8 +49,8 @@ export default function UserProfile() {
             <p className="text-2xl text-gray-700">@{userData.username}</p>
             {/* Bio Section */}
             <p className="mt-3 text-lg text-gray-600 max-w-lg leading-relaxed">
-              {/* {userData.bio} */}
-              Har har har i love to travel 🌍 | I love to eat ☕ | Great coding project here 💻
+              {userData.bio}
+              {/* Har har har i love to travel 🌍 | I love to eat ☕ | Great coding project here 💻 */}
             </p>
             {/* Followers & Following */}
             <div className="flex gap-6 mt-4 text-lg text-gray-600">
@@ -74,7 +80,9 @@ export default function UserProfile() {
           {/* Popup Menu */}
           {menuOpen && (
             <div className="absolute top-20 right-10 bg-white shadow-lg rounded-lg p-3 w-56">
-              <button className="block w-full text-left p-2 hover:bg-gray-100 rounded">
+              <button 
+                className="block w-full text-left p-2 hover:bg-gray-100 rounded"
+                onClick={handleEditProfile}>
                 Edit Profile
               </button>
               <button className="block w-full text-left p-2 hover:bg-gray-100 rounded">
