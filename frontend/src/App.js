@@ -10,6 +10,7 @@ import MyMap from './components/MyMap.js';
 import CreateAccount from './components/CreateAccount.js'
 import Profile from './components/Profile.js'
 import NavigationLayout from './components/helpers/NavigationLayout.js';
+import LocationOverlay from './components/helpers/LocationOverlay.js';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/reset-password" element={<ResetPasswordPrompt/>} />
         <Route path="/reset-password/:token" element={<ResetPassword/>} />
         <Route path="/upload" element={<UploadImage />} />
+        <Route path="/location-overlay" element={<LocationOverlay />} />
 
         {/* Routes with navigation bar */}
         <Route path="/" element={<NavigationLayout><Index /></NavigationLayout>} />

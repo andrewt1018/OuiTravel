@@ -17,6 +17,7 @@ import {
     useMapsLibrary,
     InfoWindow,
 } from "@vis.gl/react-google-maps";
+import LocationOverlay from './helpers/LocationOverlay';
 
 const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_API_KEY
 const GOOGLE_PERSONAL_MAP_ID = process.env.REACT_APP_PERSONAL_MAP_ID
@@ -27,6 +28,8 @@ function MyMap() {
     const [openInfo, setOpenInfo] = useState(false);
     const [savedIcons, setSavedIcons] = useState([]);
     const [mapCenter, setMapCenter] = useState(null);
+    const [selectedLocation, setSelectedLocation] = useState('');
+    const [placeName, setPlaceName] = useState('');
     const navigate = useNavigate();
 
     const inputRef = useRef(null);
@@ -150,15 +153,27 @@ function MyMap() {
     
     const SearchButton = () => {
         const map = useMap();
+
+        const getPlaceDetails = async (placeId) => {
+            const response = await axios.get(`https://places.googleapis.com/v1/places/${placeId}?fields=id,displayName,location&key=${GOOGLE_MAPS_API_KEY}`)
+            return response.data.displayName.text;
+        }
+
         const handleSearchAddress = async () => {
             if (!inputRef.current.value) {
                 alert("Please type a valid address!")
                 return;
             }
-            console.log("Inputref:", inputRef.current.value);
+            // Get geocode
+            console.log("Searching for:", inputRef.current.value);
             const geocode = await getGeocode(inputRef.current.value);
             const location = geocode.geometry.location;
-            console.log("location", location);
+
+            // Get display name
+            const placeId = geocode.place_id;
+            const placeDetails = await getPlaceDetails(placeId);
+            const placeName = placeDetails || geocode.formatted_address;
+            const address = geocode.formatted_address;
 
             // Pan to searched location and prepare marker
             map.panTo(location);
@@ -169,6 +184,10 @@ function MyMap() {
                     lng: location.lng
                 }
             });
+
+            setSelectedLocation(address);
+            setPlaceName(placeName);
+        
 
         }
         return <button onClick={handleSearchAddress}>Search</button>
@@ -203,6 +222,13 @@ function MyMap() {
                             position={marker.position}
                             onClick={() => setOpenInfo(true)}>
                         </AdvancedMarker>
+                    )}
+
+                    {selectedLocation && placeName && (
+                        <LocationOverlay 
+                            placeName={placeName} 
+                            placeLocation={selectedLocation} 
+                        />
                     )}
                     
                     {openInfo && (
