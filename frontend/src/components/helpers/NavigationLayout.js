@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import Header from './Header';
+
 import MenuIcon from '@mui/icons-material/Menu';
 import HomeIcon from '@mui/icons-material/Home';
 import MapIcon from '@mui/icons-material/Map';
@@ -11,7 +13,7 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import SettingsIcon from '@mui/icons-material/Settings';
 // Icons can be found here: https://mui.com/material-ui/material-icons/
 
-const NavigationLayout = ({ children }) => {
+const NavigationLayout = ({ children, showHeader = false, headerSearchBar = null }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   
   const navLinkStyles = "text-black no-underline px-2 py-2 rounded-md hover:bg-[#F4F5F6] transition-colors flex items-center gap-5";
@@ -34,10 +36,10 @@ const NavigationLayout = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-">
+    <div className="min-h-screen bg-greyish">
       {/* Navigation Sidebar */}
       <div className={`fixed top-0 left-0 h-screen transition-all duration-300 ease-in-out z-50
-        ${isExpanded ? 'w-sidebar-expanded' : 'w-sidebar-collapsed'} bg-greyish`}>
+        ${isExpanded ? 'w-sidebar-expanded' : 'w-sidebar-collapsed'}`}>
         <div className="h-full p-4 flex flex-col">
           {/* Menu Toggle Item */}
           <div 
@@ -56,7 +58,7 @@ const NavigationLayout = ({ children }) => {
           </div>
 
           {/* Divider */}
-          <div className="border-b border-grey-50 mb-12"></div>
+          <div className="mb-12"></div>
 
           {/* Navigation Items */}
           <div className="flex-1 flex flex-col gap-4">
@@ -94,7 +96,8 @@ const NavigationLayout = ({ children }) => {
       {/* Scrollable Main Content */}
       <div className={`min-h-screen transition-all duration-300 ease-in-out
         ${isExpanded ? 'ml-sidebar-expanded' : 'ml-sidebar-collapsed'}`}>
-        <div>
+        {showHeader && <Header>{headerSearchBar}</Header>}
+        <div className={`${showHeader ? 'pt-header' : ''}`}>
           {children}
         </div>
       </div>

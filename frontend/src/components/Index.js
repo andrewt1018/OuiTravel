@@ -1,8 +1,6 @@
 import {React, useEffect, useState} from "react";
 import { useNavigate } from 'react-router-dom';
 import {getUser} from './helpers/user-verification';
-import Header from './helpers/Header';
-import IndexSearchBar from './helpers/IndexSearchBar';
 
 const Index = () => {
     const [username, setUsername] = useState('');
@@ -22,13 +20,10 @@ const Index = () => {
       }, []);
 
     return username ? (
-        <div className="min-h-screen bg-greyish">
-            <Header>
-                <IndexSearchBar />
-            </Header>
-            <div className="pt-header">
-                {/* Main Content */}
-            </div>
+        <div>
+            <p>
+                Main Page :D
+            </p>
         </div>
     ) : (
         <></>

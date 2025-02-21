@@ -10,6 +10,7 @@ import MyMap from './components/MyMap.js';
 import CreateAccount from './components/CreateAccount.js'
 import Profile from './components/Profile.js'
 import NavigationLayout from './components/helpers/NavigationLayout.js';
+import IndexSearchBar from './components/helpers/IndexSearchBar';
 
 function App() {
   return (
@@ -22,10 +23,22 @@ function App() {
         <Route path="/reset-password/:token" element={<ResetPassword/>} />
         <Route path="/upload" element={<UploadImage />} />
 
-        {/* Routes with navigation bar */}
-        <Route path="/" element={<NavigationLayout><Index /></NavigationLayout>} />
-        <Route path="/my-map" element={<NavigationLayout><MyMap /></NavigationLayout>} />
-        <Route path="/profile" element={<NavigationLayout><Profile /></NavigationLayout>} />
+        {/* Routes with navigation */}
+        <Route path="/" element={
+          <NavigationLayout showHeader={true} headerSearchBar={<IndexSearchBar />}>
+            <Index />
+          </NavigationLayout>
+        } />
+        <Route path="/my-map" element={
+          <NavigationLayout showHeader={true}>
+            <MyMap />
+          </NavigationLayout>
+        } />
+        <Route path="/profile" element={
+          <NavigationLayout showHeader={false}>
+            <Profile />
+          </NavigationLayout>
+        } />
       </Routes>
     </Router>
   );
