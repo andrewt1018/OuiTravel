@@ -1,13 +1,15 @@
 "use client";
 
 import React, { useState, useCallback, useEffect, useRef } from "react";
-import axios from "axios"
-import {getUser} from "./helpers/user-verification"
 import { useNavigate } from 'react-router-dom';
+import axios from "axios"
+
+import {getUser} from "./helpers/user-verification"
+import NavigationLayout from '../components/helpers/NavigationLayout.js';
+import SearchBar from './helpers/MyMapSearchBar.js'
+
 import {
     useJsApiLoader,
-    Autocomplete,
-    useGoogleMap
   } from '@react-google-maps/api'
 import {
     APIProvider,
@@ -175,6 +177,7 @@ function MyMap() {
     }
 
     return (currLocation && isLoaded) ? (
+      <NavigationLayout showHeader={true} headerSearchBar={<SearchBar ref={inputRef}/>}>
         <div style={{ height: "100vh", width: "100vw" }}>
             <APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
             <div style={{ height: "75%", width: "75%" }}>
@@ -232,9 +235,7 @@ function MyMap() {
                 </Map>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
-                <Autocomplete>
-                    <input type="text" placeholder="Search..." ref={inputRef} />
-                </Autocomplete>
+                {/* <SearchBar ref={inputRef}/> */}
                 <SearchButton />
             </div>
             </APIProvider>
@@ -255,8 +256,12 @@ function MyMap() {
             </div>
             }
         </div>
+      </NavigationLayout>
     ) : (
-        <div>Retrieving your location ...</div>
+        <NavigationLayout showHeader={true}>
+          <div>Retrieving your location ...</div>
+        </NavigationLayout>
+
     );
 }
 
