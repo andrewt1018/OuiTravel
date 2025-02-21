@@ -1,10 +1,10 @@
 import {React, useEffect, useState} from "react";
-import { useNavigate, Link } from 'react-router-dom';
-import {getUser} from './helpers/user-verification'
+import { useNavigate } from 'react-router-dom';
+import {getUser} from './helpers/user-verification';
 
 const Index = () => {
     const [username, setUsername] = useState('');
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     useEffect( () => {
         const verifyUser = async () => {
@@ -21,13 +21,9 @@ const Index = () => {
 
     return username ? (
         <div>
-            <p>Hello {username}!</p>
-            <Link 
-                to={`/profile`} 
-                className="text-blue-600 hover:underline"
-            >
-            Go to your profile
-            </Link>
+            <p>
+                Main Page :D
+            </p>
         </div>
     ) : (
         <></>
