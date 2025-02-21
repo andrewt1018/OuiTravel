@@ -9,19 +9,23 @@ import UploadImage from "./components/UploadImageDemo.js";
 import MyMap from './components/MyMap.js';
 import CreateAccount from './components/CreateAccount.js'
 import Profile from './components/Profile.js'
+import NavigationLayout from './components/NavigationLayout';
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Index />} />
+        {/* Routes without navigation bar */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/create-account" element={<CreateAccount />} />
         <Route path="/reset-password" element={<ResetPasswordPrompt/>} />
         <Route path="/reset-password/:token" element={<ResetPassword/>} />
         <Route path="/upload" element={<UploadImage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/create-account" element={<CreateAccount />} />
-        <Route path="/my-map" element={<MyMap />} />
-        <Route path="/profile" element={<Profile />} />
+
+        {/* Routes with navigation bar */}
+        <Route path="/" element={<NavigationLayout><Index /></NavigationLayout>} />
+        <Route path="/my-map" element={<NavigationLayout><MyMap /></NavigationLayout>} />
+        <Route path="/profile" element={<NavigationLayout><Profile /></NavigationLayout>} />
       </Routes>
     </Router>
   );
