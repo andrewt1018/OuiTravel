@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import Header from './Header';
 
 import MenuIcon from '@mui/icons-material/Menu';
@@ -14,8 +14,14 @@ import SettingsIcon from '@mui/icons-material/Settings';
 // Icons can be found here: https://mui.com/material-ui/material-icons/
 
 const NavigationLayout = ({ children, showHeader = false, headerSearchBar = null }) => {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const location = useLocation();
+  const [isExpanded, setIsExpanded] = useState(location.pathname === '/');
   
+  // Update expansion state when route changes
+  useEffect(() => {
+    setIsExpanded(location.pathname === '/');
+  }, [location.pathname]);
+
   const navLinkStyles = "text-black no-underline px-2 py-2 rounded-md hover:bg-[#F4F5F6] transition-colors flex items-center gap-5";
   const labelStyles = "transition-all duration-300 overflow-hidden whitespace-nowrap";
   
