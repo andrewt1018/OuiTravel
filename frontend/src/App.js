@@ -6,22 +6,54 @@ import ResetPassword from './components/ResetPassword.js';
 import Index from './components/Index.js'
 import Login from './components/Login.js'
 import UploadImage from "./components/UploadImageDemo.js";
-import MyMap from './components/MyMap.js';
-import CreateAccount from './components/CreateAccount.js'
-import Profile from './components/Profile.js'
+import MyMap from './components/TestMap.js';
+import CreateAccount from './components/CreateAccount.js';
+import Profile from './components/Profile.js';
+import MessagePage from './components/MessagePage.js';
+import EditProfile from './components/EditProfile.js';
+import NavigationLayout from './components/helpers/NavigationLayout.js';
+import LocationOverlay from './components/helpers/LocationOverlay.js';
+import IndexSearchBar from './components/helpers/IndexSearchBar';
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Index />} />
+        {/* Routes without navigation bar */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/create-account" element={<CreateAccount />} />
         <Route path="/reset-password" element={<ResetPasswordPrompt/>} />
         <Route path="/reset-password/:token" element={<ResetPassword/>} />
         <Route path="/upload" element={<UploadImage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/create-account" element={<CreateAccount />} />
-        <Route path="/my-map" element={<MyMap />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/location-overlay" element={<LocationOverlay />} />
+
+        {/* Routes with navigation */}
+        <Route path="/" element={
+          <NavigationLayout showHeader={true} headerSearchBar={<IndexSearchBar />}>
+            <Index />
+          </NavigationLayout>
+        } />
+        <Route path="/my-map" element={
+          <NavigationLayout showHeader={true}>
+            <MyMap />
+          </NavigationLayout>
+        } />
+        <Route path="/profile" element={
+          <NavigationLayout showHeader={false}>
+            <Profile />
+          </NavigationLayout>
+        } />
+         <Route path="/messages" element={
+          <NavigationLayout showHeader={false}>
+            <MessagePage />
+          </NavigationLayout>
+        } />
+        <Route path="/edit-profile" element={
+          <NavigationLayout showHeader={false}>
+            <EditProfile />
+          </NavigationLayout>
+        } />
+
       </Routes>
     </Router>
   );
