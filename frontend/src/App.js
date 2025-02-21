@@ -6,10 +6,13 @@ import ResetPassword from './components/ResetPassword.js';
 import Index from './components/Index.js'
 import Login from './components/Login.js'
 import UploadImage from "./components/UploadImageDemo.js";
-import MyMap from './components/MyMap.js';
-import CreateAccount from './components/CreateAccount.js'
-import Profile from './components/Profile.js'
+import MyMap from './components/TestMap.js';
+import CreateAccount from './components/CreateAccount.js';
+import Profile from './components/Profile.js';
+import MessagePage from './components/MessagePage.js';
+import EditProfile from './components/EditProfile.js';
 import NavigationLayout from './components/helpers/NavigationLayout.js';
+import LocationOverlay from './components/helpers/LocationOverlay.js';
 import IndexSearchBar from './components/helpers/IndexSearchBar';
 
 function App() {
@@ -22,6 +25,7 @@ function App() {
         <Route path="/reset-password" element={<ResetPasswordPrompt/>} />
         <Route path="/reset-password/:token" element={<ResetPassword/>} />
         <Route path="/upload" element={<UploadImage />} />
+        <Route path="/location-overlay" element={<LocationOverlay />} />
 
         {/* Routes with navigation */}
         <Route path="/" element={
@@ -37,6 +41,17 @@ function App() {
             <Profile />
           </NavigationLayout>
         } />
+         <Route path="/messages" element={
+          <NavigationLayout showHeader={false}>
+            <MessagePage />
+          </NavigationLayout>
+        } />
+        <Route path="/edit-profile" element={
+          <NavigationLayout showHeader={false}>
+            <EditProfile />
+          </NavigationLayout>
+        } />
+
       </Routes>
     </Router>
   );

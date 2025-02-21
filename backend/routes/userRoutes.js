@@ -95,18 +95,19 @@ router.get('/get-userdata', verifyToken, async (req, res) => {
 });
 
 /* Edit Profile */
-// edit their bio, DoB, gender, profile picture, and other details. 
-router.post('/edit-profile', async (req, res) => {
+// edit their bio, DoB, profile picture, and other details. 
+router.post('/edit-profile', verifyToken, async (req, res) => {
 
-    const { newBio, newUsername, newDOB, newGender, newProfilePic } = req.body;
+    const { newEmail, newBio, newDOB, newGender, newProfilePic } = req.body;
     const userId = req.user.id;
 
     try {
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ message: 'User not found/invalid.'});
 
+        if (newEmail !== undefined && newEmail !== null) user.email = newEmail.trim();  
         if (newBio !== undefined && newBio !== null) user.bio = newBio.trim();
-        if (newUsername != undefined && newUsername !== null) user.username = newUsername.trim();
+        // if (newUsername != undefined && newUsername !== null) user.username = newUsername.trim();
         if (newDOB) user.dob = new Date(newDOB);
         if (newGender && ["Male", "Female", "Other"].includes(newGender)) {
             user.gender = newGender;
@@ -118,16 +119,16 @@ router.post('/edit-profile', async (req, res) => {
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: 'Cannot update user profile.' });
-
+ 
     }
 
 });
 
 /* Edit Preferences */
-router.post('/preferences', async (req, res) => {
+router.post('/preferences', verifyToken, async (req, res) => {
 
-    // const userId = req.user.id;
-    const { destinations, activities, cuisines, transportation, lodging, userId } = req.body;
+    const userId = req.user.id;
+    const { destinations, activities, cuisines, transportation, lodging } = req.body;
     console.log(destinations, activities, cuisines);
 
     try {

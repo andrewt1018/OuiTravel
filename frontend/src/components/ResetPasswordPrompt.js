@@ -41,7 +41,7 @@ function ResetPasswordPrompt() {
               Remember your password?{" "}
               <a
                 className="text-blue-600 decoration-2 hover:underline font-medium"
-                href="#"
+                href="/login"
               >
                 Login here
               </a>
