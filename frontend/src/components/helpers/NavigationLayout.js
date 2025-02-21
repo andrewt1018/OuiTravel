@@ -34,19 +34,19 @@ const NavigationLayout = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#E9EBED]">
-      {/* Fixed Navigation Sidebar */}
+    <div className="min-h-screen bg-">
+      {/* Navigation Sidebar */}
       <div className={`fixed top-0 left-0 h-screen transition-all duration-300 ease-in-out z-50
-        ${isExpanded ? 'w-sidebar-expanded' : 'w-sidebar-collapsed'}`}>
-        <div className="h-full p-4 flex flex-col bg-[#E9EBED]">
+        ${isExpanded ? 'w-sidebar-expanded' : 'w-sidebar-collapsed'} bg-greyish`}>
+        <div className="h-full p-4 flex flex-col">
           {/* Menu Toggle Item */}
           <div 
-            className={`${navLinkStyles} mb-4`}
+            className={`${navLinkStyles} mb-2`}
             onClick={toggleSidebar}
             role="button"
             tabIndex={0}
           >
-            {/* Updated MenuIcon wrapper */}
+            {/* MenuIcon */}
             <div className={`min-w-[24px] transition-all duration-300 ease-in-out ${isExpanded ? '-rotate-90' : 'rotate-0'}`}>
               <MenuIcon />
             </div>
@@ -56,7 +56,7 @@ const NavigationLayout = ({ children }) => {
           </div>
 
           {/* Divider */}
-          <div className="border-b border-black mb-10"></div>
+          <div className="border-b border-grey-50 mb-12"></div>
 
           {/* Navigation Items */}
           <div className="flex-1 flex flex-col gap-4">
@@ -94,7 +94,7 @@ const NavigationLayout = ({ children }) => {
       {/* Scrollable Main Content */}
       <div className={`min-h-screen transition-all duration-300 ease-in-out
         ${isExpanded ? 'ml-sidebar-expanded' : 'ml-sidebar-collapsed'}`}>
-        <div className="p-8 bg-gray-50">
+        <div>
           {children}
         </div>
       </div>
