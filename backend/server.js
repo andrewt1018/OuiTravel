@@ -6,6 +6,7 @@ const cors = require("cors");
 const authRoutes = require('./routes/authRoutes');
 const uploadRoutes = require("./routes/uploadRoutes");
 const userRoutes = require('./routes/userRoutes');
+const journalRoutes = require('./routes/journalRoutes');
 
 const router = express.Router();
 const app = express();
@@ -20,6 +21,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/images", uploadRoutes);
 app.use("/api/user", userRoutes);
+app.use('/api/journal', journalRoutes);
 
 app.listen(PORT, () => {
   // perform a database connection when server starts

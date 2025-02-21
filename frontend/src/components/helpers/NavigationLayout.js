@@ -30,7 +30,7 @@ const NavigationLayout = ({ children, showHeader = false, headerSearchBar = null
     { path: '/', label: 'Home', icon: <HomeIcon /> },
     { path: '/my-map', label: 'My Map', icon: <MapIcon /> },
     { path: '', label: 'Explore', icon: <TravelExploreIcon /> },
-    { path: '', label: 'Journals', icon: <DriveFileRenameOutlineIcon /> },
+    { path: '/journals', label: 'Journals', icon: <DriveFileRenameOutlineIcon /> },
     { path: '', label: 'Messages', icon: <ForumIcon /> },
     { path: '', label: 'Notifications', icon: <NotificationsIcon /> },
     { path: '/profile', label: 'Profile', icon: <PersonIcon /> },

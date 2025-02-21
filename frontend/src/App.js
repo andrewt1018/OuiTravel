@@ -11,6 +11,10 @@ import CreateAccount from './components/CreateAccount.js'
 import Profile from './components/Profile.js'
 import NavigationLayout from './components/helpers/NavigationLayout.js';
 import IndexSearchBar from './components/helpers/IndexSearchBar';
+import CreateJournal from './components/journals/CreateJournal';
+import JournalList from './components/journals/JournalList';
+import JournalView from './components/journals/JournalView';
+import EntryEditor from './components/journals/EntryEditor';
 
 function App() {
   return (
@@ -37,6 +41,28 @@ function App() {
         <Route path="/profile" element={
           <NavigationLayout showHeader={false}>
             <Profile />
+          </NavigationLayout>
+        } />
+        
+        {/* Journal routes */}
+        <Route path="/journals" element={
+          <NavigationLayout showHeader={true}>
+            <JournalList />
+          </NavigationLayout>
+        } />
+        <Route path="/journals/create" element={
+          <NavigationLayout showHeader={true}>
+            <CreateJournal />
+          </NavigationLayout>
+        } />
+        <Route path="/journals/:id" element={
+          <NavigationLayout showHeader={true}>
+            <JournalView />
+          </NavigationLayout>
+        } />
+        <Route path="/journals/:id/new-entry" element={
+          <NavigationLayout showHeader={true}>
+            <EntryEditor />
           </NavigationLayout>
         } />
       </Routes>
