@@ -34,9 +34,7 @@ function App() {
           </NavigationLayout>
         } />
         <Route path="/my-map" element={
-          <NavigationLayout showHeader={true}>
             <MyMap />
-          </NavigationLayout>
         } />
         <Route path="/profile" element={
           <NavigationLayout showHeader={false}>
