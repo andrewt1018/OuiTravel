@@ -24,7 +24,10 @@ import LocationOverlay from './helpers/LocationOverlay';
 const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_API_KEY
 const GOOGLE_PERSONAL_MAP_ID = process.env.REACT_APP_PERSONAL_MAP_ID
 
+const defaultLocation = {lat: 40.4259, lng: 86.9081}
+
 function MyMap() {
+    const [locationSupported, setLocationSupported] = useState(true);
     const [currLocation, setCurrLocation] = useState(null);
     const [marker, setMarker] = useState(null);
     const [openInfo, setOpenInfo] = useState(false);
@@ -32,6 +35,7 @@ function MyMap() {
     const [mapCenter, setMapCenter] = useState(null);
     const [selectedLocation, setSelectedLocation] = useState('');
     const [placeName, setPlaceName] = useState('');
+    const [showOverlay, setShowOverlay] = useState(false);
     const navigate = useNavigate();
 
     const inputRef = useRef(null);
@@ -57,18 +61,27 @@ function MyMap() {
         verifyUser();
         const geoLocationOptions = {
             enableHighAccuracy: false,
-            timeout: 5000,
             maximumAge: Infinity
         }
-        /** Get's the user's current location */
-        if (navigator.geolocation) {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(getLocationSuccess, getLocationError, geoLocationOptions);
-                console.log("Got current locations")
-            } else {
-                console.log("Geolocation not supported");
-            }
+        const loc = JSON.parse(localStorage.getItem("currLocation"));
+        console.log('loc:', loc);
+        if (loc) {
+          setCurrLocation(loc);
+        } else if (navigator.geolocation) { /** Get's the user's current location */
+          // navigator.geolocation.getCurrentPosition(getLocationSuccess, getLocationError, geoLocationOptions);
+          navigator.geolocation.getCurrentPosition(position => {
+            setCurrLocation({
+                lat: position.coords.latitude, 
+                lng: position.coords.longitude
+            })
+          });
+              console.log("Got current locations")
+        } else {
+            console.log("Geolocation not supported");
+            setCurrLocation(defaultLocation);
+            setLocationSupported(false);
         }
+        
     }, []);
 
     function getLocationSuccess(position) {
@@ -87,20 +100,26 @@ function MyMap() {
     }
     
     const onMapClick = (e) => {
-        if (openInfo) {
-            setOpenInfo(false);
-            return;
-        }
-        if (marker) {
-            setMarker(null);
-            return;
-        }
-        setMarker({
-            position: {
-                lat: e.detail.latLng.lat,
-                lng: e.detail.latLng.lng
-            }
-        })
+      if (showOverlay) {
+        setMarker(false);
+        setOpenInfo(false);
+        setShowOverlay(false);
+        return;
+      }
+      if (openInfo) {
+          setOpenInfo(false);
+          return;
+      }
+      if (marker) {
+          setMarker(null);
+          return;
+      }
+      setMarker({
+          position: {
+              lat: e.detail.latLng.lat,
+              lng: e.detail.latLng.lng
+          }
+      })
     }
 
     const addIcon = async () => {
@@ -153,52 +172,61 @@ function MyMap() {
         }
     };
     
-    const SearchButton = () => {
-        const map = useMap();
+    function SearchButton() {
+      const map = useMap();
 
-        const getPlaceDetails = async (placeId) => {
-            const response = await axios.get(`https://places.googleapis.com/v1/places/${placeId}?fields=id,displayName,location&key=${GOOGLE_MAPS_API_KEY}`)
-            return response.data.displayName.text;
-        }
+      const getPlaceDetails = async (placeId) => {
+          const response = await axios.get(`https://places.googleapis.com/v1/places/${placeId}?fields=id,displayName,location&key=${GOOGLE_MAPS_API_KEY}`)
+          return response.data.displayName.text;
+      }
 
-        const handleSearchAddress = async () => {
-            if (!inputRef.current.value) {
-                alert("Please type a valid address!")
-                return;
-            }
-            // Get geocode
-            console.log("Searching for:", inputRef.current.value);
-            const geocode = await getGeocode(inputRef.current.value);
-            const location = geocode.geometry.location;
+      const handleSearchAddress = async () => {
+          if (!map) {
+            console.log("Map is null");
+            return;
+          }
+          if (!inputRef.current.value) {
+            alert("Please type a valid address!")
+            return;
+          }
+          // Get geocode
+          console.log("Searching for:", inputRef.current.value);
+          const geocode = await getGeocode(inputRef.current.value);
+          const location = geocode.geometry.location;
 
-            // Get display name
-            const placeId = geocode.place_id;
-            const placeDetails = await getPlaceDetails(placeId);
-            const placeName = placeDetails || geocode.formatted_address;
-            const address = geocode.formatted_address;
+          // Get display name
+          const placeId = geocode.place_id;
+          const placeDetails = await getPlaceDetails(placeId);
+          const placeName = placeDetails || geocode.formatted_address;
+          const address = geocode.formatted_address;
 
-            // Pan to searched location and prepare marker
-            map.panTo(location);
-            setOpenInfo(false);
-            setMarker({position:
-                {
-                    lat: location.lat,
-                    lng: location.lng
-                }
-            });
-
-            setSelectedLocation(address);
-            setPlaceName(placeName);
-        
-
-        }
-        return <button onClick={handleSearchAddress}>Search</button>
+          // Pan to searched location and prepare marker
+          map.panTo(location);
+          setOpenInfo(false);
+          setMarker({position:
+              {
+                  lat: location.lat,
+                  lng: location.lng
+              }
+          });
+          setShowOverlay(true);
+          setSelectedLocation(address);
+          setPlaceName(placeName);
+      }
+      return (
+        <div className="relative inline w-1/2 max-w-2xl">
+          <button onClick={handleSearchAddress} class="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center ml-2 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+            Search
+          </button>
+        </div>
+      )
     }
 
     return (currLocation && isLoaded) ? (
-      <NavigationLayout showHeader={true} headerSearchBar={<SearchBar ref={inputRef}/>}>
-        <div style={{ height: "100vh", width: "100vw" }}>
-            <APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
+      <APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
+
+        <NavigationLayout showHeader={true} headerSearchBar={<SearchBar ref={inputRef}/>} showButton={true} headerSearchButton={<SearchButton />}>
+          <div style={{ height: "100vh", width: "100vw" }}>
             <div style={{ height: "75%", width: "75%" }}>
                 <Map 
                     defaultZoom={16} 
@@ -227,7 +255,7 @@ function MyMap() {
                         </AdvancedMarker>
                     )}
 
-                    {selectedLocation && placeName && (
+                    {showOverlay && selectedLocation && placeName && (
                         <LocationOverlay 
                             placeName={placeName} 
                             placeLocation={selectedLocation} 
@@ -260,15 +288,8 @@ function MyMap() {
                     )}
                 </Map>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
-                {/* <SearchBar ref={inputRef}/> */}
-                <SearchButton />
-            </div>
-            </APIProvider>
             
-
-
-
+            {/* Rest of the page's content after interactive map */}
             <div>
                 <p>Number of icons: {savedIcons.length}</p>
             </div>
@@ -281,8 +302,10 @@ function MyMap() {
                 <p>Map center has not been set.</p>
             </div>
             }
-        </div>
-      </NavigationLayout>
+          </div>
+        </NavigationLayout>
+      </APIProvider>
+
     ) : (
         <NavigationLayout showHeader={true}>
           <div>Retrieving your location ...</div>

@@ -13,7 +13,7 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import SettingsIcon from '@mui/icons-material/Settings';
 // Icons can be found here: https://mui.com/material-ui/material-icons/
 
-const NavigationLayout = ({ children, showHeader = false, headerSearchBar = null }) => {
+const NavigationLayout = ({ children, showHeader = false, headerSearchBar = null, headerSearchButton = null}) => {
   const location = useLocation();
   const [isExpanded, setIsExpanded] = useState(location.pathname === '/');
   
@@ -102,7 +102,7 @@ const NavigationLayout = ({ children, showHeader = false, headerSearchBar = null
       {/* Scrollable Main Content */}
       <div className={`min-h-screen transition-all duration-300 ease-in-out
         ${isExpanded ? 'ml-sidebar-expanded' : 'ml-sidebar-collapsed'}`}>
-        {showHeader && <Header>{headerSearchBar}</Header>}
+            {showHeader && <Header>{headerSearchBar}{headerSearchButton}</Header>}
         <div className={`${showHeader ? 'pt-header' : ''}`}>
           {children}
         </div>
