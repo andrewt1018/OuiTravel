@@ -18,11 +18,25 @@ const Login = () => {
         localStorage.setItem('token', res.data.token);
         localStorage.setItem('userId', res.data.userId);
         localStorage.setItem('username', res.data.username);
+        if (navigator.geolocation) {
+          if (navigator.geolocation) {
+              // navigator.geolocation.getCurrentPosition(getLocationSuccess, getLocationError, geoLocationOptions);
+              navigator.geolocation.getCurrentPosition(position => {
+                const location = {
+                    lat: position.coords.latitude, 
+                    lng: position.coords.longitude
+                };
+                localStorage.setItem('currLocation', JSON.stringify(location));
+              });
+              console.log("Cached current locations")
+          } else {
+              console.log("Geolocation not supported");
+          }
+      }
         navigate('/');
       } else {
+        console.error("Token not returned from login");
       }
-      setUsername('');
-      setPassword('');
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
         alert(error.response.data.message);
