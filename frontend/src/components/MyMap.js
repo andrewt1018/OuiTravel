@@ -66,22 +66,14 @@ function MyMap() {
         const loc = JSON.parse(localStorage.getItem("currLocation"));
         console.log('loc:', loc);
         if (loc) {
-          setCurrLocation(loc);
+            setCurrLocation(loc);
         } else if (navigator.geolocation) { /** Get's the user's current location */
-          // navigator.geolocation.getCurrentPosition(getLocationSuccess, getLocationError, geoLocationOptions);
-          navigator.geolocation.getCurrentPosition(position => {
-            setCurrLocation({
-                lat: position.coords.latitude, 
-                lng: position.coords.longitude
-            })
-          });
-              console.log("Got current locations")
+            navigator.geolocation.getCurrentPosition(getLocationSuccess, getLocationError, geoLocationOptions);
         } else {
             console.log("Geolocation not supported");
             setCurrLocation(defaultLocation);
             setLocationSupported(false);
         }
-        
     }, []);
 
     function getLocationSuccess(position) {
@@ -97,6 +89,8 @@ function MyMap() {
       
     function getLocationError() {
         console.log("Unable to retrieve your location");
+        setCurrLocation(defaultLocation);
+        setLocationSupported(false);
     }
     
     const onMapClick = (e) => {
