@@ -184,13 +184,16 @@ router.post("/update-visibility", verifyToken, async (req, res) => {
 
 router.get("/search-users", async (req, res) => {
   console.log("reqbody is ", req);
-  const { query } = req.query;
-  if (!query) return res.json([]); // Return empty array if no query is provided
+  //const { query} = req.query;
+  const { query, exclude } = req.query;
+  if (!query) return res.json([]);
 
   try {
     const users = await User.find(
-      { username: new RegExp(query, "i") }, // Case-insensitive regex match
-      { username: 1, _id: 1 } // Return only username and _id
+      {
+        username: { $regex: `^${query}`, $options: "i", $ne: exclude }, // Exclude logged-in user
+      },
+      { username: 1, _id: 1 }
     ).limit(10);
 
     res.json(users);
@@ -198,6 +201,19 @@ router.get("/search-users", async (req, res) => {
     console.error("Error fetching search results:", error);
     res.status(500).json({ message: "Server error" });
   }
+  // if (!query) return res.json([]); // Return empty array if no query is provided
+
+  // try {
+  //   const users = await User.find(
+  //     { username: new RegExp(`^${query}`, "i") }, // Case-insensitive regex match
+  //     { username: 1, _id: 1 } // Return only username and _id
+  //   ).limit(10);
+
+  //   res.json(users);
+  // } catch (error) {
+  //   console.error("Error fetching search results:", error);
+  //   res.status(500).json({ message: "Server error" });
+  // }
 });
 
 module.exports = router;
