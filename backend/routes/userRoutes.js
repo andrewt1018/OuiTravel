@@ -161,6 +161,7 @@ router.post("/preferences", verifyToken, async (req, res) => {
   }
 });
 
+//for account privacy setting
 router.post("/update-visibility", verifyToken, async (req, res) => {
   console.log("reqbody is ", req.body);
   const { visibility } = req.body;
@@ -178,6 +179,24 @@ router.post("/update-visibility", verifyToken, async (req, res) => {
     console.log(error);
     console.log("wtf");
     return res.status(500).json({ message: "Cannot update visibility." });
+  }
+});
+
+router.get("/search-users", async (req, res) => {
+  console.log("reqbody is ", req);
+  const { query } = req.query;
+  if (!query) return res.json([]); // Return empty array if no query is provided
+
+  try {
+    const users = await User.find(
+      { username: new RegExp(query, "i") }, // Case-insensitive regex match
+      { username: 1, _id: 1 } // Return only username and _id
+    ).limit(10);
+
+    res.json(users);
+  } catch (error) {
+    console.error("Error fetching search results:", error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
