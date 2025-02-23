@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const UserSearchDropdown = ({ query, setQuery }) => {
+  const navigate = useNavigate(); // Hook for navigation
+
   const [results, setResults] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [loggedInUsername, setLoggedInUsername] = useState(""); // Store the current user's username
@@ -50,6 +53,13 @@ const UserSearchDropdown = ({ query, setQuery }) => {
     return () => clearTimeout(debounceTimeout);
   }, [query, loggedInUsername]);
 
+  // Function to handle when a user is selected
+  const handleSelect = (username) => {
+    setQuery(username); // Update the search bar with selected username
+    navigate(`/profile/${username}`); // Navigate to profile
+    setShowDropdown(false); // Hide dropdown after selection
+  };
+
   return (
     showDropdown &&
     results.length > 0 && (
@@ -58,7 +68,7 @@ const UserSearchDropdown = ({ query, setQuery }) => {
           <button
             key={user._id}
             className="w-full text-left px-4 py-2 hover:bg-gray-100"
-            onMouseDown={() => setQuery(user.username)}
+            onMouseDown={() => handleSelect(user.username)}
           >
             {user.username}
           </button>

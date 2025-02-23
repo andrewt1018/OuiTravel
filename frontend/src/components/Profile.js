@@ -126,12 +126,12 @@ export default function UserProfile() {
                 </strong>
                 <span>Following</span>
               </div>
-              <button
+              {/* <button
                 className="mt-2 px-3 py-1 text-lg text-gray-600 border border-gray-400 rounded-md hover:bg-gray-100 transition"
                 onClick={handleFollow}
               >
                 {isFollowing ? "Following" : "Follow"}
-              </button>
+              </button> */}
             </div>
           </div>
           {/* Options Button */}
