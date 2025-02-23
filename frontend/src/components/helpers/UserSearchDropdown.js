@@ -4,6 +4,28 @@ import axios from "axios";
 const UserSearchDropdown = ({ query, setQuery }) => {
   const [results, setResults] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [loggedInUsername, setLoggedInUsername] = useState(""); // Store the current user's username
+
+  // Fetch the logged-in user's data
+  useEffect(() => {
+    const fetchLoggedInUser = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:3001/api/user/get-user",
+          {
+            headers: {
+              "x-access-token": localStorage.getItem("token"), // Get token from local storage
+            },
+          }
+        );
+        setLoggedInUsername(response.data.user.username); // Set the username in state
+      } catch (error) {
+        console.error("Error fetching logged-in user:", error);
+      }
+    };
+
+    fetchLoggedInUser();
+  }, []);
 
   useEffect(() => {
     if (query.length === 0) {
@@ -14,7 +36,7 @@ const UserSearchDropdown = ({ query, setQuery }) => {
     const fetchUsers = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3001/api/user/search-users?query=${query}`
+          `http://localhost:3001/api/user/search-users?query=${query}&exclude=${loggedInUsername}`
         );
         setResults(response.data);
         setShowDropdown(true);
@@ -26,7 +48,7 @@ const UserSearchDropdown = ({ query, setQuery }) => {
 
     const debounceTimeout = setTimeout(fetchUsers, 300); // Debounce API call
     return () => clearTimeout(debounceTimeout);
-  }, [query]);
+  }, [query, loggedInUsername]);
 
   return (
     showDropdown &&
