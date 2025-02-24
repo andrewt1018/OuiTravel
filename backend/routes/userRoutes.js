@@ -223,19 +223,42 @@ router.get("/search-users", async (req, res) => {
     console.error("Error fetching search results:", error);
     res.status(500).json({ message: "Server error" });
   }
-  // if (!query) return res.json([]); // Return empty array if no query is provided
+});
 
-  // try {
-  //   const users = await User.find(
-  //     { username: new RegExp(`^${query}`, "i") }, // Case-insensitive regex match
-  //     { username: 1, _id: 1 } // Return only username and _id
-  //   ).limit(10);
+router.post("/follow-user", verifyToken, async (req, res) => {
+  const { followerID, followedID } = req.body;
 
-  //   res.json(users);
-  // } catch (error) {
-  //   console.error("Error fetching search results:", error);
-  //   res.status(500).json({ message: "Server error" });
-  // }
+  try {
+    // Get the followed user
+    const followedUser = await User.findById(followedID);
+    if (!followedUser || followedUser.visibility === "Private") {
+      return res
+        .status(403)
+        .json({ message: "Cannot follow private accounts." });
+    }
+
+    // Get the follower user
+    const followerUser = await User.findById(followerID);
+    if (!followerUser) {
+      return res.status(404).json({ message: "Follower not found." });
+    }
+
+    // Update follower list & count
+    followedUser.followerList.push(followerID);
+    followedUser.followerCount += 1;
+
+    // Update following list & count
+    followerUser.followingList.push(followedID);
+    followerUser.followingCount += 1;
+
+    // Save changes
+    await followedUser.save();
+    await followerUser.save();
+
+    res.status(200).json({ message: "Followed successfully!" });
+  } catch (error) {
+    res.status(500).json({ message: "Error following user." });
+  }
 });
 
 module.exports = router;
