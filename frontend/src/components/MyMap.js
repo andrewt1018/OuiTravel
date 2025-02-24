@@ -31,6 +31,8 @@ function MyMap() {
     const [currLocation, setCurrLocation] = useState(null);
     const [marker, setMarker] = useState(null);
     const [openInfo, setOpenInfo] = useState(false);
+    const [openIconInfo, setOpenIconInfo] = useState(false);
+    const [selectedIcon, setSelectedIcon] = useState('');
     const [savedIcons, setSavedIcons] = useState([]);
     const [mapCenter, setMapCenter] = useState(null);
     const [selectedLocation, setSelectedLocation] = useState('');
@@ -94,16 +96,10 @@ function MyMap() {
     }
     
     const onMapClick = (e) => {
-      if (showOverlay) {
-        setMarker(false);
-        setOpenInfo(false);
-        setShowOverlay(false);
-        return;
-      }
-      if (openInfo) {
-          setOpenInfo(false);
-          return;
-      }
+      setOpenInfo(false);
+      setShowOverlay(false);
+      setOpenInfo(false);
+      setOpenIconInfo(false);
       if (marker) {
           setMarker(null);
           return;
@@ -143,6 +139,42 @@ function MyMap() {
                 console.log("Error: " + error);
             }
         }
+    }
+    
+    const removeIcon = async () => {
+        /* Sanity checks */
+        if (!selectedIcon || !openIconInfo) {
+          console.error("Something wrong when removing icon!")
+          return;
+        }
+        try {
+          const token = localStorage.getItem("token");
+          await axios.post('http://localhost:3001/api/user/remove-icon', { selectedIcon },
+              {headers: { 'x-access-token': `${token}`}});
+          console.log("Successfully removed icon!")
+          
+          setSavedIcons(savedIcons.filter(item => item._id !== selectedIcon))
+          setOpenIconInfo(false);
+          setSelectedIcon('');
+        } catch (error) {
+          if (error.response.status === 403) {
+              alert("User is not logged in!")
+              navigate("/login");
+              return;
+          }
+          if (error.response.data.message) {
+              alert(error.response.data.message);
+          } else {
+              console.log("Error: " + error);
+          }
+        }
+    }
+
+    const handleIconClick = (id) => {
+      const icon = savedIcons.find(icon => icon._id === id);
+      console.log("found icon:", icon);
+      setOpenIconInfo(true);
+      setSelectedIcon(id);
     }
 
     const handleCameraChange = useCallback((e) => {
@@ -237,6 +269,7 @@ function MyMap() {
                         <AdvancedMarker
                             key={icon._id}
                             position={icon.position}
+                            onClick={() => handleIconClick(icon._id)}
                         >
                             <span style={{fontSize:"2rem"}}>{icon.char}</span>
                         </AdvancedMarker>
@@ -279,6 +312,26 @@ function MyMap() {
                                     </button>
                                 </div>
                         </InfoWindow>
+                    )}
+
+                    {selectedIcon && (
+                      <InfoWindow 
+                          position={savedIcons.find(item => item._id === selectedIcon).position}
+                          onCloseClick={() => {setOpenIconInfo(false); setSelectedIcon('')}}
+                          options={{
+                              pixelOffset: new window.google.maps.Size(0, -40),
+                          }}
+                      >
+                              <div>
+                                  <button
+                                      type="submit"
+                                      className={`w-full py-3 px-4 inline-flex justify-center items-center gap-2 rounded-md border border-transparent font-semibold bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all text-sm`}
+                                      onClick={() => removeIcon()}
+                                  >
+                                      Remove icon
+                                  </button>
+                              </div>
+                      </InfoWindow>
                     )}
                 </Map>
             </div>

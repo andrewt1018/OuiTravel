@@ -80,6 +80,28 @@ router.post("/save-icon", verifyToken, async (req, res) => {
   }
 });
 
+router.post("/remove-icon", verifyToken, async (req, res) => {
+    const userId = req.user.id;
+    const { selectedIcon } = req.body;
+    console.log("selected icon:", selectedIcon)
+    const dbConnect = dbo.getDb();
+    try {
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ message: "User not found/invalid." });
+
+        await dbConnect.collection("users").updateOne(
+            { _id: ObjectId.createFromHexString(userId) },
+            {
+                $pull: { savedIcons: { _id: ObjectId.createFromHexString(selectedIcon) }}
+            }
+        )
+        return res.status(201).json({ message: "Successfully removed icon" });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Cannot save icon." });
+    }
+});
+
 /* Get user data */
 /* Used to verify the current user's JWT token (to ensure they're logged in) */
 router.get("/get-userdata", verifyToken, async (req, res) => {
