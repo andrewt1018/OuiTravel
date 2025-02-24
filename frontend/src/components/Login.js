@@ -26,6 +26,7 @@ const Login = () => {
                     lat: position.coords.latitude, 
                     lng: position.coords.longitude
                 };
+                console.log("Current location:", location);
                 localStorage.setItem('currLocation', JSON.stringify(location));
               });
               console.log("Cached current locations")
