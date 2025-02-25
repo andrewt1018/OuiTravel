@@ -52,6 +52,12 @@ const userSchema = new mongoose.Schema({
       ref: "User", // Self-reference for following
     },
   ],
+  pendingFollowers: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User", // Self-reference for pending followers when account is private
+    },
+  ],
   blockedList: [
     {
       type: mongoose.Schema.Types.ObjectId,
