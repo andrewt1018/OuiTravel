@@ -81,25 +81,28 @@ router.post("/save-icon", verifyToken, async (req, res) => {
 });
 
 router.post("/remove-icon", verifyToken, async (req, res) => {
-    const userId = req.user.id;
-    const { selectedIcon } = req.body;
-    console.log("selected icon:", selectedIcon)
-    const dbConnect = dbo.getDb();
-    try {
-        const user = await User.findById(userId);
-        if (!user) return res.status(404).json({ message: "User not found/invalid." });
+  const userId = req.user.id;
+  const { selectedIcon } = req.body;
+  console.log("selected icon:", selectedIcon);
+  const dbConnect = dbo.getDb();
+  try {
+    const user = await User.findById(userId);
+    if (!user)
+      return res.status(404).json({ message: "User not found/invalid." });
 
-        await dbConnect.collection("users").updateOne(
-            { _id: ObjectId.createFromHexString(userId) },
-            {
-                $pull: { savedIcons: { _id: ObjectId.createFromHexString(selectedIcon) }}
-            }
-        )
-        return res.status(201).json({ message: "Successfully removed icon" });
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({ message: "Cannot save icon." });
-    }
+    await dbConnect.collection("users").updateOne(
+      { _id: ObjectId.createFromHexString(userId) },
+      {
+        $pull: {
+          savedIcons: { _id: ObjectId.createFromHexString(selectedIcon) },
+        },
+      }
+    );
+    return res.status(201).json({ message: "Successfully removed icon" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Cannot save icon." });
+  }
 });
 
 /* Get user data */
@@ -225,39 +228,69 @@ router.get("/search-users", async (req, res) => {
   }
 });
 
-router.post("/follow-user", verifyToken, async (req, res) => {
-  const { followerID, followedID } = req.body;
+// Follow a user
+router.post("/follow/:userId", verifyToken, async (req, res) => {
+  const userId = req.user.id; // Current logged-in user
+  const { userId: targetUserId } = req.params; // User to follow
 
   try {
-    // Get the followed user
-    const followedUser = await User.findById(followedID);
-    if (!followedUser || followedUser.visibility === "Private") {
-      return res
-        .status(403)
-        .json({ message: "Cannot follow private accounts." });
+    if (userId === targetUserId) {
+      return res.status(400).json({ message: "You cannot follow yourself" });
     }
 
-    // Get the follower user
-    const followerUser = await User.findById(followerID);
-    if (!followerUser) {
-      return res.status(404).json({ message: "Follower not found." });
+    const user = await User.findById(userId);
+    const targetUser = await User.findById(targetUserId);
+
+    if (!user || !targetUser) {
+      return res.status(404).json({ message: "User not found" });
     }
 
-    // Update follower list & count
-    followedUser.followerList.push(followerID);
-    followedUser.followerCount += 1;
+    if (!user.followingList.includes(targetUserId)) {
+      user.followingList.push(targetUserId);
+      targetUser.followerList.push(userId);
+      user.followingCount += 1;
+      targetUser.followerCount += 1;
+    }
 
-    // Update following list & count
-    followerUser.followingList.push(followedID);
-    followerUser.followingCount += 1;
+    await user.save();
+    await targetUser.save();
 
-    // Save changes
-    await followedUser.save();
-    await followerUser.save();
-
-    res.status(200).json({ message: "Followed successfully!" });
+    return res.status(200).json({ message: "Followed successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Error following user." });
+    console.error(error);
+    return res.status(500).json({ message: "Error following user" });
+  }
+});
+
+// Unfollow a user
+router.post("/unfollow/:userId", verifyToken, async (req, res) => {
+  const userId = req.user.id;
+  const { userId: targetUserId } = req.params;
+
+  try {
+    const user = await User.findById(userId);
+    const targetUser = await User.findById(targetUserId);
+
+    if (!user || !targetUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.following = user.followingList.filter(
+      (id) => id.toString() !== targetUserId
+    );
+    targetUser.followerList = targetUser.followerList.filter(
+      (id) => id.toString() !== userId
+    );
+    user.followingCount -= 1;
+    targetUser.followerCount -= 1;
+
+    await user.save();
+    await targetUser.save();
+
+    return res.status(200).json({ message: "Unfollowed successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Error unfollowing user" });
   }
 });
 
