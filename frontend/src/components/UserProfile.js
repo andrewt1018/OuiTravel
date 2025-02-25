@@ -18,9 +18,30 @@ export default function UserProfile() {
   const menuRef = useRef(null);
   const [isPrivate, setIsPrivate] = useState(false);
 
-  const handleFollow = () => {
-    setIsFollowing(!isFollowing);
-    // backend not implemented
+  const handleFollow = async () => {
+    try {
+      if (isFollowing) {
+        await axios.post(
+          `http://localhost:3001/api/user/unfollow/${userData._id}`,
+          {},
+          {
+            headers: { "x-access-token": localStorage.getItem("token") },
+          }
+        );
+        setIsFollowing(false);
+      } else {
+        await axios.post(
+          `http://localhost:3001/api/user/follow/${userData._id}`,
+          {},
+          {
+            headers: { "x-access-token": localStorage.getItem("token") },
+          }
+        );
+        setIsFollowing(true);
+      }
+    } catch (error) {
+      console.error("Error following/unfollowing user:", error);
+    }
   };
 
   useEffect(() => {
@@ -37,6 +58,19 @@ export default function UserProfile() {
         } else {
           setIsPrivate(false);
         }
+
+        // Check if the logged-in user follows this profile
+        const loggedInUser = await axios.get(
+          "http://localhost:3001/api/user/get-user",
+          {
+            headers: { "x-access-token": localStorage.getItem("token") },
+          }
+        );
+
+        const isUserFollowing = res.data.followerList.includes(
+          loggedInUser.data.user._id
+        );
+        setIsFollowing(isUserFollowing);
       } catch (error) {
         console.error("Error fetching user profile:", error);
       }
@@ -75,7 +109,11 @@ export default function UserProfile() {
             </div>
 
             <button
-              className="mt-2 px-3 py-1 text-lg text-gray-600 border border-gray-400 rounded-md hover:bg-gray-100 transition"
+              className={`mt-2 px-3 py-1 text-lg text-gray-600 border rounded-md transition ${
+                isFollowing
+                  ? "border-blue-500 text-blue-500"
+                  : "border-gray-400 hover:bg-gray-100"
+              }`}
               onClick={handleFollow}
             >
               {isFollowing ? "Following" : "Follow"}
