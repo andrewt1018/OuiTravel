@@ -9,8 +9,8 @@ import UploadImage from "./components/UploadImageDemo.js";
 import MyMap from "./components/MyMap.js";
 import CreateAccount from "./components/CreateAccount.js";
 import Profile from "./components/Profile.js";
+import SettingPage from './components/SettingPage.js';
 import MessagePage from "./components/MessagePage.js";
-import EditProfile from "./components/EditProfile.js";
 import NavigationLayout from "./components/helpers/NavigationLayout.js";
 import LocationOverlay from "./components/helpers/LocationOverlay.js";
 import IndexSearchBar from "./components/helpers/IndexSearchBar";
@@ -57,10 +57,10 @@ function App() {
           }
         />
         <Route
-          path="/edit-profile"
+          path="/settings"
           element={
             <NavigationLayout showHeader={false}>
-              <EditProfile />
+              <SettingPage />
             </NavigationLayout>
           }
         />

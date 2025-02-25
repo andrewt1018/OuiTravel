@@ -13,6 +13,7 @@ const authRoutes = require("./routes/authRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
 const userRoutes = require("./routes/userRoutes");
 const messageRoutes = require("./routes/messageRoutes");
+const notificationRoute = require('./routes/notiRoutes');
 const profileRoutes = require("./routes/profileRoutes"); //profile route for other users' profiles
 
 const router = express.Router();
@@ -34,6 +35,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/images", uploadRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/message", messageRoutes);
+app.use("/api/noti", notificationRoute)
 app.use("/api/profile", profileRoutes); //profile route
 
 app.listen(PORT, () => {

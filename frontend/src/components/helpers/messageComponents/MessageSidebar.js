@@ -12,7 +12,7 @@ const MessageSidebar = ({ userId, selectedUser, setSelectedUser }) => {
         const res = await axios.get(`http://localhost:3001/api/message/getUsersForSideBar`, {
           headers: { 'x-access-token': `${token}`}
         });
-        console.log(res);
+        // console.log(res);
         setUsers(res.data.data);
       } catch (error) {
         console.error("Error fetching users for sidebar:", error);
@@ -20,7 +20,7 @@ const MessageSidebar = ({ userId, selectedUser, setSelectedUser }) => {
     };
 
     fetchUsers();
-    const interval = setInterval(fetchUsers, 500000); // Auto-refresh every 500ms
+    const interval = setInterval(fetchUsers, 500); // Auto-refresh every 500ms
     return () => clearInterval(interval);
   }, [userId]);
 
@@ -81,7 +81,7 @@ const MessageSidebar = ({ userId, selectedUser, setSelectedUser }) => {
             key={user.userId}
             className={`flex items-center gap-3 p-4 cursor-pointer hover:bg-gray-100 transition ${
               selectedUser?.userId === user.userId ? "bg-gray-200" : ""
-            }${user.unread ? 'bg-gray-300' : ''}`}
+            }${user.unread && user.userId !== userId ? 'font-bold relative' : ''}`}
             // onClick={() => setSelectedUser(user)}
             onClick={() => handleUserSelect(user)}
           >
@@ -100,6 +100,9 @@ const MessageSidebar = ({ userId, selectedUser, setSelectedUser }) => {
                     </span>
                 </div>
             </div>
+            {/* {user.unread && user.userId !== userId && (
+              <div className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full"></div> // Red dot indicating unread
+            )} */}
           </div>
         ))
       )}
