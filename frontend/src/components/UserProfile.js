@@ -35,15 +35,13 @@ export default function UserProfile() {
         setIsSentFollow(false);
       } else {
         console.log("you are trying to follow");
-        if (userData.visibility === "Public") {
-          await axios.post(
-            `http://localhost:3001/api/user/follow/${userData._id}`,
-            {},
-            {
-              headers: { "x-access-token": localStorage.getItem("token") },
-            }
-          );
-        }
+        await axios.post(
+          `http://localhost:3001/api/user/follow/${userData._id}`,
+          {},
+          {
+            headers: { "x-access-token": localStorage.getItem("token") },
+          }
+        );
 
         console.log("currently isSent is ", isSentFollow);
         setIsSentFollow(true);

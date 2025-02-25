@@ -7,6 +7,7 @@ const ObjectId = require("mongodb").ObjectId;
 const jwt = require("jsonwebtoken");
 
 const User = require("../modules/User");
+const Notification = require("../modules/Notification");
 
 const router = express.Router();
 
@@ -245,15 +246,51 @@ router.post("/follow/:userId", verifyToken, async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    if (!user.followingList.includes(targetUserId)) {
-      user.followingList.push(targetUserId);
-      targetUser.followerList.push(userId);
-      user.followingCount += 1;
-      targetUser.followerCount += 1;
-    }
+    if (targetUser.visibility === "Private") {
+      // Private account: Send a follow request notification
+      if (!targetUser.pendingFollowers.includes(userId)) {
+        targetUser.pendingFollowers.push(userId);
+        await targetUser.save();
 
-    await user.save();
-    await targetUser.save();
+        // Create a follow request notification
+        const newNotification = new Notification({
+          senderId: userId,
+          receiverId: [targetUserId], // Target user receives notification
+          type: "Follow Request",
+          followrequest: "Private",
+          content: user.username + "wants to follow you.",
+          read: false, // Unread by default
+          timestamp: new Date(), // Current timestamp
+        });
+
+        await newNotification.save();
+
+        return res.status(200).json({ message: "Follow request sent" });
+      } else {
+        return res.status(400).json({ message: "Follow request already sent" });
+      }
+    } else {
+      if (!user.followingList.includes(targetUserId)) {
+        user.followingList.push(targetUserId);
+        targetUser.followerList.push(userId);
+        user.followingCount += 1;
+        targetUser.followerCount += 1;
+        await user.save();
+        await targetUser.save();
+
+        // Create a follow request notification
+        const newNotification = new Notification({
+          senderId: userId,
+          receiverId: [targetUserId], // Target user receives notification
+          type: "Follow Request",
+          followrequest: "Public",
+          content: user.username + " followed you ",
+          read: false, // Unread by default
+          timestamp: new Date(), // Current timestamp by default
+        });
+        await newNotification.save();
+      }
+    }
 
     return res.status(200).json({ message: "Followed successfully" });
   } catch (error) {
