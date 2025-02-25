@@ -17,6 +17,8 @@ export default function UserProfile() {
   const [isFollowing, setIsFollowing] = useState(false);
   const menuRef = useRef(null);
   const [isPrivate, setIsPrivate] = useState(false);
+  const [followText, setFollowText] = useState("Follow");
+  const [isSentFollow, setIsSentFollow] = useState(false);
 
   const handleFollow = async () => {
     try {
@@ -29,15 +31,32 @@ export default function UserProfile() {
           }
         );
         setIsFollowing(false);
+        setFollowText("Follow");
+        setIsSentFollow(false);
       } else {
-        await axios.post(
-          `http://localhost:3001/api/user/follow/${userData._id}`,
-          {},
-          {
-            headers: { "x-access-token": localStorage.getItem("token") },
-          }
-        );
-        setIsFollowing(true);
+        console.log("you are trying to follow");
+        if (userData.visibility === "Public") {
+          await axios.post(
+            `http://localhost:3001/api/user/follow/${userData._id}`,
+            {},
+            {
+              headers: { "x-access-token": localStorage.getItem("token") },
+            }
+          );
+        }
+
+        console.log("currently isSent is ", isSentFollow);
+        setIsSentFollow(true);
+        console.log("after setting, isSent is ", isSentFollow);
+        //check private or public
+        if (userData.visibility === "Private") {
+          console.log("currently textis ", followText);
+          setFollowText("Follow Requested");
+          console.log("after textis ", followText); //i think setting it here might be useless because async function
+        } else {
+          setIsFollowing(true);
+          setFollowText("Following");
+        }
       }
     } catch (error) {
       console.error("Error following/unfollowing user:", error);
@@ -59,7 +78,7 @@ export default function UserProfile() {
           setIsPrivate(false);
         }
 
-        // Check if the logged-in user follows this profile
+        // Check if the logged-in user follows this profile already
         const loggedInUser = await axios.get(
           "http://localhost:3001/api/user/get-user",
           {
@@ -70,7 +89,17 @@ export default function UserProfile() {
         const isUserFollowing = res.data.followerList.includes(
           loggedInUser.data.user._id
         );
-        setIsFollowing(isUserFollowing);
+        console.log("hello do i follow him ", isUserFollowing);
+        console.log("did i sent request ", isSentFollow);
+
+        setIsFollowing(isUserFollowing); //set the text of button when revisit the profile
+        if (isUserFollowing) {
+          setFollowText("Following");
+        } else if (isSentFollow) {
+          setFollowText("Follow Requested");
+        } else {
+          setFollowText("Follow");
+        }
       } catch (error) {
         console.error("Error fetching user profile:", error);
       }
@@ -116,7 +145,8 @@ export default function UserProfile() {
               }`}
               onClick={handleFollow}
             >
-              {isFollowing ? "Following" : "Follow"}
+              {/* {isFollowing ? "Following" : "Follow"} */}
+              {followText}
             </button>
           </div>
         </div>
