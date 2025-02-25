@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Header from './Header';
+import NotificationSidebar from './NotificationSidebar';
 
 import MenuIcon from '@mui/icons-material/Menu';
 import HomeIcon from '@mui/icons-material/Home';
@@ -16,6 +17,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 const NavigationLayout = ({ children, showHeader = false, headerSearchBar = null, headerSearchButton = null}) => {
   const location = useLocation();
   const [isExpanded, setIsExpanded] = useState(location.pathname === '/');
+  const [isNotificationsVisible, setIsNotificationsVisible] = useState(false);
   
   // Update expansion state when route changes
   useEffect(() => {
@@ -25,6 +27,15 @@ const NavigationLayout = ({ children, showHeader = false, headerSearchBar = null
   const navLinkStyles = "text-black no-underline px-2 py-2 rounded-md hover:bg-[#F4F5F6] transition-colors flex items-center gap-5";
   const labelStyles = "transition-all duration-300 overflow-hidden whitespace-nowrap";
   
+const toggleNotifications = () => {
+  if (isExpanded) {
+    setIsExpanded(false);
+    setIsNotificationsVisible(true);
+  } else {
+    setIsNotificationsVisible(!isNotificationsVisible);
+  }
+};
+  
   // Add Navigation Items with Material UI icons here:
   const navItems = [
     { path: '/', label: 'Home', icon: <HomeIcon /> },
@@ -32,14 +43,19 @@ const NavigationLayout = ({ children, showHeader = false, headerSearchBar = null
     { path: '', label: 'Explore', icon: <TravelExploreIcon /> },
     { path: '', label: 'Journals', icon: <DriveFileRenameOutlineIcon /> },
     { path: '/messages', label: 'Messages', icon: <ForumIcon /> },
-    { path: '', label: 'Notifications', icon: <NotificationsIcon /> },
+    { path: '', label: 'Notifications', icon: <NotificationsIcon />, onClick: toggleNotifications },
     { path: '/profile', label: 'Profile', icon: <PersonIcon /> },
 
   ];
 
   const toggleSidebar = () => {
     setIsExpanded(!isExpanded);
+    setIsNotificationsVisible(false);
   };
+
+
+
+  console.log(isNotificationsVisible);
 
   return (
     <div className="min-h-screen bg-greyish">
@@ -69,23 +85,52 @@ const NavigationLayout = ({ children, showHeader = false, headerSearchBar = null
           {/* Navigation Items */}
           <div className="flex-1 flex flex-col gap-4">
             {navItems.map((item) => (
+              item.label !== 'Notifications' ? (
               <Link 
-                key={item.path}
+                key={item.label}
                 to={item.path}
                 className={navLinkStyles}
+                onClick={() => {
+                  if (isNotificationsVisible) {
+                    setIsNotificationsVisible(false);
+                  }
+                }}
               >
                 <span className="min-w-[24px]">{item.icon}</span>
                 <span className={`${labelStyles} ${isExpanded ? 'w-24 opacity-100' : 'w-0 opacity-0'}`}>
                   {item.label}
                 </span>
               </Link>
-            ))}
+            ) : (
+              <div 
+              key="notifications"
+              className={navLinkStyles}
+              onClick={toggleNotifications}
+              role="button"
+              tabIndex={0}
+            >
+              <span className="min-w-[24px]">
+                <NotificationsIcon />
+              </span>
+              <span className={`${labelStyles} ${isExpanded ? 'w-24 opacity-100' : 'w-0 opacity-0'}`}>
+                Notifications
+              </span>
+            </div>
+
+            )
+          ))}
           </div>
+
+          {/* Notification Sidebar */}
+          {!isExpanded && isNotificationsVisible && (
+            <NotificationSidebar closePanel={() => setIsNotificationsVisible(false)} />
+          )}
+
 
           {/* Settings at bottom */}
           <div>
             <Link 
-              to=""
+              to="/settings"
               className={navLinkStyles}
             >
               <span className="min-w-[24px]">

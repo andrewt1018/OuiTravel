@@ -1,7 +1,5 @@
-const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
-
-const preferencesSchema = new mongoose.Schema({});
+const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 
 const positionSchema = new mongoose.Schema({
   lat: {
@@ -40,36 +38,32 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  followerList: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // Self-reference for followers
-    },
-  ],
-  followingList: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // Self-reference for following
-    },
-  ],
-  pendingFollowers: [
-    {
+  firstName: {
+    type: String
+  },
+  lastName: {
+    type: String
+  },
+  followerList: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User', // Self-reference for followers
+  }],
+  followingList: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User', // Self-reference for following
+  }],
+  pendingFollowers: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: "User", // Self-reference for pending followers when account is private
-    },
-  ],
-  blockedList: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // Self-reference for following
-    },
-  ],
-  blockedByList: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // Self-reference for following
-    },
-  ],
+  }],
+  blockedList: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User', // Self-reference for following
+  }],
+  blockedByList: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User', // Self-reference for following
+  }],
   followerCount: {
     type: Number,
     default: 0,
@@ -116,7 +110,8 @@ const userSchema = new mongoose.Schema({
     },
   ],
   preferences: {
-    type: preferencesSchema,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Preferences"
   },
   visibility: {
     type: String,

@@ -22,8 +22,8 @@ export default function UserProfile() {
   };
 
   const handleEditProfile = () => {
-    navigate("/edit-profile");
-  };
+    navigate('/settings');
+  }
 
   const [isPrivate, setIsPrivate] = useState(true);
 
@@ -105,7 +105,7 @@ export default function UserProfile() {
           </div>
           {/* User Info */}
           <div className="flex-1 flex flex-col">
-            <h1 className="text-5xl font-bold pb-4">Elisa Chen</h1>
+            <h1 className="text-5xl font-bold pb-4">{userData.firstName} {userData.lastName}</h1>
             <p className="text-2xl text-gray-700">@{userData.username}</p>
             {/* Bio Section */}
             <p className="mt-3 text-lg text-gray-600 max-w-lg leading-relaxed">

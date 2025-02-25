@@ -1,6 +1,7 @@
 const express = require('express');
 const User = require('../modules/User');
 const Message = require('../modules/Message');
+const Notification = require('../modules/Notification');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 
@@ -61,6 +62,7 @@ router.post('/sendMessage', verifyToken, async (req, res) => {
         }
     
         const allowed = await checkMutual(senderId, receiverId);
+        const sender = await User.findById(senderId);
     
         if (!allowed) {
             return res.status(403).json({ message: 'You can only message people who follow you back.' });
@@ -81,6 +83,23 @@ router.post('/sendMessage', verifyToken, async (req, res) => {
         //     io.to(receiverSocketId).emit("newMessage", newMessage);
         // }
 
+        // Notification 
+        // TODO: check if the receiver turn on their message
+
+        const newMessNoti = new Notification({
+            senderId,
+            receiverId,
+            type: 'New Message',
+            content: `${sender.username} send you a new message.`
+        });
+
+        await newMessNoti.save();
+        console.log("new noti", newMessNoti);
+
+        const receiver = await User.findById(receiverId);
+        receiver.notifications.push(newMessNoti); // Push the new notification
+        await receiver.save(); 
+
         res.status(201).json({ message: 'Message sent successfully.', data: newMessage });
     
     } catch (error) {
@@ -97,8 +116,6 @@ router.get('/getMessage/:receiverId', verifyToken, async (req, res) => {
     // const userId = new mongoose.Types.ObjectId('67af70f25e51fce3c060ab4d');
     // const { receiverId } = req.params;
     const receiverId = new mongoose.Types.ObjectId(req.params.receiverId);
-    console.log("userId: ", userId);
-    console.log ("receiverId: ", receiverId);
     try {
         const messages = await Message.find({
             $or: [
@@ -106,7 +123,6 @@ router.get('/getMessage/:receiverId', verifyToken, async (req, res) => {
                 { senderId: receiverId, receiverId: userId }
             ]
         }).sort({ timestamp: -1 }).lean();
-        console.log("retrieve messages: ", messages);
 
         return res.status(200).json({ success: true, data: messages });
 
@@ -119,9 +135,7 @@ router.get('/getMessage/:receiverId', verifyToken, async (req, res) => {
 
 router.get('/getUsersForSideBar', verifyToken, async (req, res) => {
 
-    // console.log(req.query);
     const userId = req.user.id;
-    // const userId = new mongoose.Types.ObjectId(req.query.userId);
 
     try {
         const user = await User.findById(userId);
@@ -163,13 +177,8 @@ router.get('/getUsersForSideBar', verifyToken, async (req, res) => {
             }
         ]);
         
-        console.log("Final Result:", messages);
-
         let users = [];
         for (let msg of messages) {
-            console.log("msg sender id: ", msg.senderId.toString());
-            console.log("msg reciever id: ", msg.receiverId.toString());
-            console.log("user id: ", user._id.toString());
 
 
             let otherUserId = msg.senderId.toString() === user._id.toString() 
@@ -188,7 +197,6 @@ router.get('/getUsersForSideBar', verifyToken, async (req, res) => {
             }
         }
 
-        console.log("Side bar users data: ", users);
         return res.status(200).json({ data: users });
 
     } catch (error) {
@@ -223,5 +231,29 @@ router.post('/markMessageAsRead', verifyToken, async (req, res) => {
         return res.status(500).json({ message: 'Error marking messages as read' });
     }
 });
+
+router.get("/getMessUser/:userId", verifyToken, async (req, res) => {
+
+    console.log("req params", req.params);
+    try {
+        const { userId } = req.params;
+        console.log("userId: ", userId);
+
+        const user = await User.findById(userId).select("username profilePic"); 
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.json({
+            userId: user._id,
+            username: user.username,
+            profilePic: user.profilePic
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Error fetching user data" });
+    }
+});
+
 
 module.exports = router;

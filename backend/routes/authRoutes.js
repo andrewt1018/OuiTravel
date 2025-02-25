@@ -218,6 +218,35 @@ router.post('/reset-password/:token', async(req, res) => {
   }
 });
 
+router.post('/changePassword', verifyToken, async (req, res) => {
+
+  const userId = req.user.id;
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ message: "Missing information to update password "});
+  }
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+        return res.status(400).json({ message: 'Current password is incorrect.' });
+    }
+    user.password = newPassword;
+
+    await user.save();
+    
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Error updating password "});
+  }
+})
+
 
 
 
