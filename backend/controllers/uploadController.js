@@ -3,6 +3,7 @@ require("dotenv").config({ path: "./config.env" });
 
 const MongoClient = require("mongodb").MongoClient;
 const GridFSBucket = require("mongodb").GridFSBucket;
+const { ObjectId } = require("mongodb");
 
 const URI = process.env.ATLAS_URI;
 const PORT = process.env.PORT;
@@ -59,6 +60,7 @@ const getListFiles = async (req, res) => {
     let fileInfos = [];
     await cursor.forEach((doc) => {
       fileInfos.push({
+        id: doc._id,
         name: doc.filename,
         url: baseUrl + doc.filename,
       });
@@ -101,8 +103,44 @@ const download = async (req, res) => {
   }
 };
 
+const downloadById = async (req, res) => {
+  try {
+    const id = req.params.id;
+    
+    // Validate if the id is a valid ObjectId
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).send({ message: "Invalid ID format" });
+    }
+
+    await mongoClient.connect();
+    const database = mongoClient.db(process.env.DATABASE);
+    const bucket = new GridFSBucket(database, {
+      bucketName: process.env.IMG_BUCKET,
+    });
+
+    let downloadStream = bucket.openDownloadStream(new ObjectId(id));
+
+    downloadStream.on("data", function (data) {
+      return res.status(200).write(data);
+    });
+
+    downloadStream.on("error", function (err) {
+      return res.status(404).send({ message: "Cannot download the Image!" });
+    });
+
+    downloadStream.on("end", () => {
+      return res.end();
+    });
+  } catch (error) {
+    return res.status(500).send({
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   uploadFiles,
   getListFiles,
   download,
+  downloadById,  // Add the new function to exports
 };
