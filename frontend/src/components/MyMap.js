@@ -37,6 +37,7 @@ function MyMap() {
     const [mapCenter, setMapCenter] = useState(null);
     const [selectedLocation, setSelectedLocation] = useState('');
     const [placeName, setPlaceName] = useState('');
+    const [placeId, setPlaceId] = useState('');
     const [showOverlay, setShowOverlay] = useState(false);
     const navigate = useNavigate();
 
@@ -197,15 +198,57 @@ function MyMap() {
           console.error("Request failed:", error);
         }
     };
+
+    async function getOrCreateLocation(placeIdObj) {
+        const { placeId, name, address, coordinates } = placeIdObj;
+    
+        const token = localStorage.getItem('token');
+    
+        try {
+            const res = await axios.post('http://localhost:3001/api/location/post-location', 
+                { placeId, name, address, coordinates }, 
+                { headers: { 'x-access-token': `${token}` } }
+            );
+    
+            console.log("Location response:", res.data);
+            return res.data;
+        } catch (error) {
+            console.error("Error updating/creating location:", error);
+            throw error;
+        }
+    }
+      
     
     function SearchButton() {
-      const map = useMap();
+        const map = useMap();
 
-      const getPlaceDetails = async (placeId) => {
-          const response = await axios.get(`https://places.googleapis.com/v1/places/${placeId}?fields=id,displayName,location&key=${GOOGLE_MAPS_API_KEY}`)
-          return response.data.displayName.text;
-      }
+        const getPlaceDetails = async (placeId) => {
+            const response = await axios.get(`https://places.googleapis.com/v1/places/${placeId}?fields=id,displayName,location&key=${GOOGLE_MAPS_API_KEY}`)
+            return response.data.displayName.text;
+        }
 
+    // // Get display name
+    // const fetchedPlaceId = geocode.place_id;
+    // const placeDetails = await getPlaceDetails(placeId);
+    // const placeName = placeDetails || geocode.formatted_address;
+    // const address = geocode.formatted_address;
+
+    // // Pan to searched location and prepare marker
+    // map.panTo(location);
+    // setOpenInfo(false);
+    // setMarker({position:
+    //     {
+    //         lat: location.lat,
+    //         lng: location.lng
+    //     }
+    // });
+
+    // setSelectedLocation(address);
+    // setPlaceName(placeName);
+    // setPlaceId(fetchedPlaceId);
+
+
+    
       const handleSearchAddress = async () => {
           if (!map) {
             console.log("Map is null");
@@ -221,10 +264,18 @@ function MyMap() {
           const location = geocode.geometry.location;
 
           // Get display name
-          const placeId = geocode.place_id;
+          const fetchedPlaceId = geocode.place_id;
           const placeDetails = await getPlaceDetails(placeId);
           const placeName = placeDetails || geocode.formatted_address;
           const address = geocode.formatted_address;
+          
+            // Create location object if placeId doesn't already exist
+            const locationData = await getOrCreateLocation({
+                placeId: fetchedPlaceId,
+                name: placeName,
+                address,
+                coordinates: { lat: location.lat, lng: location.lng },
+            });
 
           // Pan to searched location and prepare marker
           map.panTo(location);
@@ -238,6 +289,7 @@ function MyMap() {
           setShowOverlay(true);
           setSelectedLocation(address);
           setPlaceName(placeName);
+          setPlaceId(fetchedPlaceId);
       }
       return (
         <div className="relative inline w-1/2 max-w-2xl">
@@ -284,6 +336,7 @@ function MyMap() {
 
                     {showOverlay && selectedLocation && placeName && (
                         <LocationOverlay 
+                            placeId={placeId}
                             placeName={placeName} 
                             placeLocation={selectedLocation} 
                         />
