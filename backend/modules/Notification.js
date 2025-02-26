@@ -27,6 +27,7 @@ const NotificationSchema = new mongoose.Schema({
       "Achievement Unlocked",
       "Tagged",
       "Recommended Location",
+      "New Follower",
     ],
     required: true,
   },
