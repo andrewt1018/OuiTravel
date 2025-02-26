@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
 import axios from "axios";
+import {getUser} from "./helpers/user-verification"
 import "./styles/general.css";
 import {
   Box,
@@ -13,12 +16,15 @@ import {
 export default function UserProfile() {
   const { username } = useParams(); // Get username from URL
   const [userData, setUserData] = useState({});
+  const [followingCount, setFollowingCount] = useState(0);
+  const [followerCount, setFollowerCount] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const menuRef = useRef(null);
   const [isPrivate, setIsPrivate] = useState(false);
   const [followText, setFollowText] = useState("Follow");
   const [isSentFollow, setIsSentFollow] = useState(false);
+  const navigate = useNavigate();
 
   const handleFollow = async () => {
     try {
@@ -32,6 +38,7 @@ export default function UserProfile() {
         );
         setIsFollowing(false);
         setFollowText("Follow");
+        setFollowerCount(followerCount - 1);
         setIsSentFollow(false);
       } else {
         console.log("you are trying to follow");
@@ -48,11 +55,12 @@ export default function UserProfile() {
         console.log("after setting, isSent is ", isSentFollow);
         //check private or public
         if (userData.visibility === "Private") {
-          console.log("currently textis ", followText);
+          console.log("currently text is", followText);
           setFollowText("Follow Requested");
           console.log("after textis ", followText); //i think setting it here might be useless because async function
         } else {
           setIsFollowing(true);
+          setFollowerCount(followerCount + 1);
           setFollowText("Following");
         }
       }
@@ -64,10 +72,19 @@ export default function UserProfile() {
   useEffect(() => {
     async function fetchUserProfile() {
       try {
+        const loggedInUser = await getUser();
+        if (!loggedInUser) {
+          alert("User not logged in!")
+          navigate("/login")
+          return;
+        }
+
         const res = await axios.get(
           `http://localhost:3001/api/profile/${username}`
         );
         setUserData(res.data);
+        setFollowingCount(res.data.followingCount);
+        setFollowerCount(res.data.followerCount);
 
         // Set the visibility field (Public/Private)
         if (res.data.visibility === "Private") {
@@ -77,15 +94,8 @@ export default function UserProfile() {
         }
 
         // Check if the logged-in user follows this profile already
-        const loggedInUser = await axios.get(
-          "http://localhost:3001/api/user/get-user",
-          {
-            headers: { "x-access-token": localStorage.getItem("token") },
-          }
-        );
-
         const isUserFollowing = res.data.followerList.includes(
-          loggedInUser.data.user._id
+          loggedInUser._id
         );
         console.log("hello do i follow him ", isUserFollowing);
         console.log("did i sent request ", isSentFollow);
@@ -124,13 +134,13 @@ export default function UserProfile() {
           <div className="flex gap-6 mt-4 text-lg text-gray-600">
             <div className="flex items-center gap-2">
               <strong className="text-gray-900">
-                {userData.followerCount}
+                {followerCount}
               </strong>
               <span>Followers</span>
             </div>
             <div className="flex items-center gap-2">
               <strong className="text-gray-900">
-                {userData.followingCount}
+                {followingCount}
               </strong>
               <span>Following</span>
             </div>
