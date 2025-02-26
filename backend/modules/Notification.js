@@ -31,18 +31,13 @@ const NotificationSchema = new mongoose.Schema({
     ],
     required: true,
   },
-  followrequest: {
-    type: String,
-    enum: ["Public", "Private"],
-    required: true,
-  },
   content: {
     type: String,
     required: true,
   },
   read: {
     type: Boolean,
-    required: false,
+    default: false
   },
   timestamp: {
     type: Date,

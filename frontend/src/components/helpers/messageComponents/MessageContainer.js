@@ -40,7 +40,7 @@ const MessageContainer = ({ userId, selectedUser }) => {
         };
 
         fetchMessages();
-        const interval = setInterval(fetchMessages, 100); // Auto-refresh every 500ms
+        const interval = setInterval(fetchMessages, 500); // Auto-refresh every 500ms
         return () => clearInterval(interval);
     }, [selectedUser, userId]);
     

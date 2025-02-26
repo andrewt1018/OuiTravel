@@ -63,7 +63,7 @@ const UserSearchDropdown = ({ query, setQuery }) => {
   return (
     showDropdown &&
     results.length > 0 && (
-      <div className="absolute w-full bg-white border border-gray-300 rounded-md mt-1 shadow-lg">
+      <div className="relative w-full bg-white border border-gray-300 rounded-md mt-1 shadow-lg">
         {results.map((user) => (
           <button
             key={user._id}

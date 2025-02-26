@@ -37,7 +37,7 @@ router.get('/getNoti', verifyToken, async (req, res) => {
 
         const notifications = await Notification.find({
             receiverId: userId
-        }). sort({ timestamp: -1 });
+        }).sort({ timestamp : -1});
 
         // TODO: Check noti settings
 
@@ -71,5 +71,38 @@ router.delete('/delete/:notiId', verifyToken, async (req, res) => {
         return res.status(500).json({ message: 'Error deleting notification. '});
     }
 });
+
+router.post('/markNotiAsRead', verifyToken, async (req, res) => {
+    const userId = req.user.id;
+    const {notificationId} = req.body;
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(500).json({ message: 'User not found. '});
+        }
+
+        const noti = await Notification.findById(notificationId);
+        noti.read = true;
+        console.log("noti: ", noti);
+
+        // Mark all message noti from the same user as read
+        if (noti.type === 'New Message') {
+            await Notification.updateMany(
+                { senderId: noti.senderId, receiverId: userId}, 
+                { $set : { read : true }}
+            );
+        }
+        await noti.save();
+
+        console.log(noti);
+        
+        return res.status(200).json({ message: 'Notification marked as read. '});
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Error marking noti as read.' });
+    }
+
+})
 
 module.exports = router;

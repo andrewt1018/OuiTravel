@@ -1,9 +1,15 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { formatTimestamp } from "./formatTimestamp";
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import SearchIcon from '@mui/icons-material/Search';
 
 const MessageSidebar = ({ userId, selectedUser, setSelectedUser }) => {
   const [users, setUsers] = useState([]);
   const [isCollapsed, setIsCollapsed] = useState(false); 
+  const [query, setQuery] = useState("");
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -12,8 +18,15 @@ const MessageSidebar = ({ userId, selectedUser, setSelectedUser }) => {
         const res = await axios.get(`http://localhost:3001/api/message/getUsersForSideBar`, {
           headers: { 'x-access-token': `${token}`}
         });
-        // console.log(res);
         setUsers(res.data.data);
+
+        const allUsersRes = await axios.get(`http://localhost:3001/api/message/getAllUsers`, 
+          {
+            headers: { 'x-access-token': `${token}`}
+          }
+        )
+        setFilteredUsers(allUsersRes.data.data);
+        setAllUsers(allUsersRes.data.data);
       } catch (error) {
         console.error("Error fetching users for sidebar:", error);
       }
@@ -24,6 +37,18 @@ const MessageSidebar = ({ userId, selectedUser, setSelectedUser }) => {
     return () => clearInterval(interval);
   }, [userId]);
 
+  useEffect(() => {
+    if (query) {
+      const results = allUsers.filter(user =>
+        user.username.toLowerCase().startsWith(query.toLowerCase()) 
+      );
+      setFilteredUsers(results);    
+    
+    } else {
+      setFilteredUsers(allUsers);
+    }
+  }, [query, allUsers]);
+
   // Toggle the sidebar collapse state
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -32,6 +57,7 @@ const MessageSidebar = ({ userId, selectedUser, setSelectedUser }) => {
   const handleUserSelect = async(user) => {
     console.log(user)
     setSelectedUser(user);
+    setQuery("");
     if (user.unread) {
       try {
         const token = localStorage.getItem("token");
@@ -59,18 +85,38 @@ const MessageSidebar = ({ userId, selectedUser, setSelectedUser }) => {
             className="focus:outline-none"
             // onClick={toggleSidebar} // Toggle sidebar visibility
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 text-gray-100"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-              <path d="M2 10a2 2 0 012-2h12a2 2 0 012 2 2 2 0 01-2 2H4a2 2 0 01-2-2z" />
-            </svg>
+          <ArrowBackIosIcon/>
           </button>
         </div>
       </header>
+      
+      {/* Search */}
+      <div className="relative mt-4">
+        <SearchIcon sx={{ fontSize: 30 }} className="absolute inset-y-2 left-2 text-gray-300" />
+        <input 
+          type="text" 
+          className="w-full py-2 pl-10 pr-4 text-gray-700 bg-white border rounded-md focus:outline-none"
+          placeholder="Search user"
+          onChange={(e) => setQuery(e.target.value)}
+          value={query}
+        />
+        
+        {/* Show dropdown of filtered users */}
+        {filteredUsers.length > 0 && query && (
+          <ul className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+            {filteredUsers.map((user) => (
+              <li
+                key={user.userId}
+                className="cursor-pointer px-4 py-2 hover:bg-gray-100"
+                onClick={() => handleUserSelect(user)}
+              >
+                {user.username}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
 
       {/* Sidebar content */}
       {users.length === 0 ? (
@@ -120,15 +166,6 @@ const MessageSidebar = ({ userId, selectedUser, setSelectedUser }) => {
       </div>
     </div>
   );
-};
-
-const formatTimestamp = (timestamp) => {
-  if (!timestamp) return "";
-  const date = new Date(timestamp);
-  return new Intl.DateTimeFormat("en", {
-    hour: "numeric",
-    minute: "numeric",
-  }).format(date);
 };
 
 export default MessageSidebar;

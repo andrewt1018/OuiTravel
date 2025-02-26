@@ -95,6 +95,7 @@ const EditProfile = () => {
             {
                 headers: {'x-access-token' : `${token}`}
             });
+            console.log("done");
 
             alert("Password updated successfully.");
 

@@ -54,7 +54,6 @@ router.post('/sendMessage', verifyToken, async (req, res) => {
 
     const senderId = req.user.id;
     const { receiverId, content } = req.body;
-    console.log(req.body);
 
     try {
         if (!receiverId || !content) {
@@ -254,6 +253,24 @@ router.get("/getMessUser/:userId", verifyToken, async (req, res) => {
         res.status(500).json({ message: "Error fetching user data" });
     }
 });
+
+
+router.get('/getAllUsers', verifyToken, async (req, res) => {
+
+    try {
+      const users = await User.find().select('_id username');
+      const formattedUsers = users.map(user => ({
+        userId: user._id, 
+        username: user.username,
+        profilePic: user.profilePic
+      }));    
+      res.status(200).json({ data: formattedUsers });
+    
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Error fetching users for search bar" });
+    }
+  });
 
 
 module.exports = router;

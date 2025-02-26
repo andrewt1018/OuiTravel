@@ -167,11 +167,12 @@ router.post("/edit-profile", verifyToken, async (req, res) => {
   }
 });
 
-router.get("/getPreferences", verifyToken, async (req, res) => {
-  const userId = req.user.id;
-  try {
-    const preferences = await Preferences.findOne({ userId: userId });
-    console.log(preferences);
+/* Get user preferences to fill the preferences page */
+router.get('/getPreferences', verifyToken, async(req, res) => {
+    const userId = req.user.id;
+    try {
+        const preferences = await Preferences.findOne({userId: userId});
+        console.log(preferences);
 
     return res.status(200).json({ preferences });
   } catch (error) {
@@ -180,11 +181,11 @@ router.get("/getPreferences", verifyToken, async (req, res) => {
   }
 });
 
-router.post("/preferences", verifyToken, async (req, res) => {
-  const userId = req.user.id;
-  const { activities, activitiesOther, cuisines, travelTypes, destinations } =
-    req.body.preferences;
-  console.log(activities, activitiesOther, cuisines, travelTypes, destinations);
+/* Edit preferences */
+router.post('/preferences', verifyToken, async (req, res) => {
+    const userId = req.user.id;
+    const { activities, activitiesOther, cuisines, travelTypes,  destinations } = req.body.preferences;
+    console.log(activities, activitiesOther, cuisines, travelTypes,  destinations);
 
   try {
     const user = await User.findById(userId);
@@ -363,5 +364,7 @@ router.post("/unfollow/:userId", verifyToken, async (req, res) => {
     return res.status(500).json({ message: "Error unfollowing user" });
   }
 });
+
+
 
 module.exports = router;
