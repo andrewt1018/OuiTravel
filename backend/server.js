@@ -7,6 +7,7 @@ const authRoutes = require('./routes/authRoutes');
 const uploadRoutes = require("./routes/uploadRoutes");
 const userRoutes = require('./routes/userRoutes');
 const messageRoutes = require('./routes/messageRoutes');
+const locationRoutes = require('./routes/locationRoutes');
 
 const router = express.Router();
 const app = express();
@@ -23,6 +24,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/images", uploadRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/message", messageRoutes);
+app.use("/api/location", locationRoutes);
 
 app.listen(PORT, () => {
   // perform a database connection when server starts

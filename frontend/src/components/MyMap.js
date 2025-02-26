@@ -30,6 +30,7 @@ function MyMap() {
     const [mapCenter, setMapCenter] = useState(null);
     const [selectedLocation, setSelectedLocation] = useState('');
     const [placeName, setPlaceName] = useState('');
+    const [placeId, setPlaceId] = useState('');
     const navigate = useNavigate();
 
     const inputRef = useRef(null);
@@ -150,6 +151,26 @@ function MyMap() {
           console.error("Request failed:", error);
         }
     };
+
+    async function getOrCreateLocation(placeIdObj) {
+        const { placeId, name, address, coordinates } = placeIdObj;
+    
+        const token = localStorage.getItem('token');
+    
+        try {
+            const res = await axios.post('http://localhost:3001/api/location/post-location', 
+                { placeId, name, address, coordinates }, 
+                { headers: { 'x-access-token': `${token}` } }
+            );
+    
+            console.log("Location response:", res.data);
+            return res.data;
+        } catch (error) {
+            console.error("Error updating/creating location:", error);
+            throw error;
+        }
+    }
+      
     
     const SearchButton = () => {
         const map = useMap();
@@ -170,7 +191,7 @@ function MyMap() {
             const location = geocode.geometry.location;
 
             // Get display name
-            const placeId = geocode.place_id;
+            const fetchedPlaceId = geocode.place_id;
             const placeDetails = await getPlaceDetails(placeId);
             const placeName = placeDetails || geocode.formatted_address;
             const address = geocode.formatted_address;
@@ -187,7 +208,16 @@ function MyMap() {
 
             setSelectedLocation(address);
             setPlaceName(placeName);
-        
+            setPlaceId(fetchedPlaceId);
+
+            // Create location object if placeId doesn't already exist
+            const locationData = await getOrCreateLocation({
+                placeId: fetchedPlaceId,
+                name: placeName,
+                address,
+                coordinates: { lat: location.lat, lng: location.lng },
+            });
+    
 
         }
         return <button onClick={handleSearchAddress}>Search</button>
@@ -226,6 +256,7 @@ function MyMap() {
 
                     {selectedLocation && placeName && (
                         <LocationOverlay 
+                            placeId={placeId}
                             placeName={placeName} 
                             placeLocation={selectedLocation} 
                         />
@@ -264,9 +295,6 @@ function MyMap() {
                 <SearchButton />
             </div>
             </APIProvider>
-            
-
-
 
             <div>
                 <p>Number of icons: {savedIcons.length}</p>
