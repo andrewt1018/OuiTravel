@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
@@ -6,7 +7,7 @@ import BookmarkAddedIcon from "@mui/icons-material/BookmarkAdded";
 import { CardContent, CardHeader } from "@mui/material";
 import { ExpandMore, ExpandLess } from "@mui/icons-material";
 
-export default function LocationOverlay({ placeName, placeLocation }) {
+export default function LocationOverlay({ placeId, placeName, placeLocation }) {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -20,12 +21,15 @@ export default function LocationOverlay({ placeName, placeLocation }) {
     <div className="absolute bottom-4 right-4 w-96 bg-white shadow-lg rounded-2xl overflow-hidden">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-100 to-purple-100">
-        <CardHeader
+      <CardHeader
           title={placeName || "Unknown Location"}
           subheader={
-            <a href="#" className="text-gray-500 text-sm hover:underline">
+            <Link 
+              to={`/location-page/${placeId}`} 
+              className="text-gray-500 text-sm hover:underline"
+            >
               More details
-            </a>
+            </Link>
           }
           action={
             <div className="flex gap-2">

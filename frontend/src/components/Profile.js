@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import {getUser} from "./helpers/user-verification"
 import axios from "axios";
 import "./styles/general.css";
 import {
@@ -68,29 +69,26 @@ export default function UserProfile() {
   }, [menuOpen]);
 
   useEffect(() => {
-    async function getUserData() {
-      console.log("In useEffect");
-      const token = localStorage.getItem("token");
+    /** Verify user first */
+    const verifyUser = async () => {
+      const user = await getUser();
+      if (!user) {
+          alert("User not logged in!")
+          navigate("/login")
+          return;
+      }
       try {
-        const res = await axios.get(
-          "http://localhost:3001/api/user/get-userdata",
-          {
-            headers: { "x-access-token": `${token}` },
-          }
-        );
-        setUserData(res.data.message);
-
-        // Set switch state based on visibility
-        if (res.data.message.visibility === "Public") {
+        setUserData(user);
+        if (user.visibility === "Public") {
           setIsPrivate(false);
-        } else if (res.data.message.visibility === "Private") {
+        } else if (user.visibility === "Private") {
           setIsPrivate(true);
-        }
+        } 
       } catch (error) {
-        alert("User not logged in!");
+        console.log("Error when verifying user:", error);
       }
     }
-    getUserData();
+    verifyUser();
   }, []);
 
   return (
