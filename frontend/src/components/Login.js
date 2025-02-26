@@ -78,7 +78,7 @@ const Login = () => {
             {"Don't have an account?"} <Link to="/create-account">{'Create one here'}</Link>.
           </p>
           <p>
-            {'Forgot your password?'} <Link to="/password-reset">{'Reset your password'}</Link>.
+            {'Forgot your password?'} <Link to="/reset-password">{'Reset your password'}</Link>.
           </p>
         </form>
       </div>  
