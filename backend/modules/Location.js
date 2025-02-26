@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const locationSchema = new mongoose.Schema({
+  placeId: {
+    type: String,
+    required: true,
+  },
   name: {
     type: String,
     required: true,
