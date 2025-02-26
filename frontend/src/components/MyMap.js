@@ -220,12 +220,12 @@ function MyMap() {
       
     
     function SearchButton() {
-      const map = useMap();
+        const map = useMap();
 
-      const getPlaceDetails = async (placeId) => {
-          const response = await axios.get(`https://places.googleapis.com/v1/places/${placeId}?fields=id,displayName,location&key=${GOOGLE_MAPS_API_KEY}`)
-          return response.data.displayName.text;
-      }
+        const getPlaceDetails = async (placeId) => {
+            const response = await axios.get(`https://places.googleapis.com/v1/places/${placeId}?fields=id,displayName,location&key=${GOOGLE_MAPS_API_KEY}`)
+            return response.data.displayName.text;
+        }
 
     // // Get display name
     // const fetchedPlaceId = geocode.place_id;
