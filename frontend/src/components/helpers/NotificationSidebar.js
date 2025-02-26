@@ -12,7 +12,7 @@ import TagIcon from "@mui/icons-material/Tag";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
-// import { formatDistanceToNow } from "date-fns";
+import { formatTimestamp } from "./messageComponents/formatTimestamp";
 
 const notificationIcons = {
   "Follow Request": <PersonAddIcon />,
@@ -54,7 +54,25 @@ const NotificationSidebar = ({ isNotificationsVisible, closePanel }) => {
   }, []);
 
 
-  const handleNotificationClick = (noti) => {
+  const handleNotificationClick = async (noti) => {
+    if (!noti.read) {
+      try {
+        const token = localStorage.getItem("token");
+        console.log(token);
+        await axios.post(`http://localhost:3001/api/noti/markNotiAsRead`, 
+        {notificationId: noti._id }, 
+        {
+          headers: { 'x-access-token' : `${token}` }
+        });
+
+        // TODO: change the notification
+        setNotifications(prevNotifications => prevNotifications.map(notification => 
+          notification._id === noti._id ? {...notification, read: true} : notification));
+
+      } catch (error) {
+        console.error("Error marking message as read: ", error);
+      }
+    }
     if (noti.type === 'New Message') {
       closePanel();
       console.log("noti sender: ", noti.senderId);
@@ -89,12 +107,16 @@ const NotificationSidebar = ({ isNotificationsVisible, closePanel }) => {
             {notifications.map((notif) => (
               <li
                 key={notif.id}
-                className="flex items-center gap-3 p-2 border-b cursor-pointer"
+                className={`flex items-center gap-3 p-2 border-b cursor-pointer 
+                          ${notif.read ? '' : 'font-semibold'}`}
                 onClick={() => handleNotificationClick(notif)}
               >
                 <span className="text-blue-300">{notificationIcons[notif.type]}</span>
                 <div>
                   <p className="text-sm">{notif.content}</p>
+                  <span className="text-xs text-gray-400 whitespace-nowrap">
+                    {formatTimestamp(notif.timestamp)}
+                  </span>
                   {notif.type === "Follow Request" && (
                     <div className="flex gap-2 mt-2">
                       <button

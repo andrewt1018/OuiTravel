@@ -85,8 +85,10 @@ export default function UserProfile() {
           setIsPrivate(true);
         } 
       } catch (error) {
-        console.log("Error when verifying user:", error);
-      }
+        alert("User not logged in!");
+        navigate('/login');
+        return;
+;      }
     }
     verifyUser();
   }, []);
