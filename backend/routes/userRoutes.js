@@ -296,6 +296,7 @@ router.post("/follow/:userId", verifyToken, async (req, res) => {
         });
 
         await newNotification.save();
+        targetUser.notifications.push(newNotification);
 
         return res.status(200).json({ message: "Follow request sent" });
       } else {
@@ -321,6 +322,7 @@ router.post("/follow/:userId", verifyToken, async (req, res) => {
           timestamp: new Date(), // Current timestamp by default
         });
         await newNotification.save();
+        targetUser.notifications.push(newNotification);
       }
     }
 
