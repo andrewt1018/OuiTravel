@@ -11,6 +11,7 @@ const cors = require("cors");
 // Specify all of the backend routes for the server
 const authRoutes = require("./routes/authRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
+const locationRoutes = require('./routes/locationRoutes');
 const userRoutes = require("./routes/userRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const notificationRoute = require('./routes/notiRoutes');
