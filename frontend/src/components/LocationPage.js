@@ -30,6 +30,7 @@ export default function LocationPage() {
   // Fetch the location data using the placeId
   useEffect(() => {
     async function fetchLocation() {
+      console.log("hi there")
       try {
         const token = localStorage.getItem("token");
         const res = await axios.get("http://localhost:3001/api/location/get-location", {

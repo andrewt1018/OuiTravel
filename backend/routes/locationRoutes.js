@@ -28,7 +28,7 @@ const verifyToken = (req, res, next) => {
 
 router.get('/get-location', verifyToken, async (req, res) => {
   const { placeId } = req.query;
-
+  console.log("inside get-location");
   try {
     const location = await Location.findOne({ placeId });
     if (!location) {
