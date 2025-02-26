@@ -8,7 +8,7 @@ const jwt = require("jsonwebtoken");
 
 const User = require("../modules/User");
 const Notification = require("../modules/Notification");
-const Preferences = require('../modules/Preferences');
+const Preferences = require("../modules/Preferences");
 
 const router = express.Router();
 
@@ -125,19 +125,28 @@ router.get("/get-userdata", verifyToken, async (req, res) => {
 });
 
 /* Edit Profile */
-// edit their bio, DoB, profile picture, and other details. 
-router.post('/edit-profile', verifyToken, async (req, res) => {
-
-    const { newEmail, newBio, newDOB, newGender, newProfilePic, newFirstName, newLastName } = req.body;
-    const userId = req.user.id;
+// edit their bio, DoB, profile picture, and other details.
+router.post("/edit-profile", verifyToken, async (req, res) => {
+  const {
+    newEmail,
+    newBio,
+    newDOB,
+    newGender,
+    newProfilePic,
+    newFirstName,
+    newLastName,
+  } = req.body;
+  const userId = req.user.id;
 
   try {
     const user = await User.findById(userId);
     if (!user)
       return res.status(404).json({ message: "User not found/invalid." });
 
-    if (newFirstName !== undefined && newFirstName !== null) user.firstName = newFirstName.trim();
-    if (newFirstName !== undefined && newLastName !== null) user.lastName = newLastName.trim();
+    if (newFirstName !== undefined && newFirstName !== null)
+      user.firstName = newFirstName.trim();
+    if (newFirstName !== undefined && newLastName !== null)
+      user.lastName = newLastName.trim();
     if (newEmail !== undefined && newEmail !== null)
       user.email = newEmail.trim();
     if (newBio !== undefined && newBio !== null) user.bio = newBio.trim();
@@ -158,23 +167,24 @@ router.post('/edit-profile', verifyToken, async (req, res) => {
   }
 });
 
-router.get('/getPreferences', verifyToken, async(req, res) => {
-    const userId = req.user.id;
-    try {
-        const preferences = await Preferences.findOne({userId: userId});
-        console.log(preferences);
+router.get("/getPreferences", verifyToken, async (req, res) => {
+  const userId = req.user.id;
+  try {
+    const preferences = await Preferences.findOne({ userId: userId });
+    console.log(preferences);
 
-        return res.status(200).json({preferences});
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({ message: 'Cant get user preferences' });
-    }
-})
+    return res.status(200).json({ preferences });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Cant get user preferences" });
+  }
+});
 
-router.post('/preferences', verifyToken, async (req, res) => {
-    const userId = req.user.id;
-    const { activities, activitiesOther, cuisines, travelTypes,  destinations } = req.body.preferences;
-    console.log(activities, activitiesOther, cuisines, travelTypes,  destinations);
+router.post("/preferences", verifyToken, async (req, res) => {
+  const userId = req.user.id;
+  const { activities, activitiesOther, cuisines, travelTypes, destinations } =
+    req.body.preferences;
+  console.log(activities, activitiesOther, cuisines, travelTypes, destinations);
 
   try {
     const user = await User.findById(userId);
@@ -182,114 +192,117 @@ router.post('/preferences', verifyToken, async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-        const currentPreferences = await Preferences.findOne({userId: userId});
+    const currentPreferences = await Preferences.findOne({ userId: userId });
 
-        let preferences = currentPreferences || new Preferences({ userId });
+    let preferences = currentPreferences || new Preferences({ userId });
 
-        preferences.activities = activities || preferences.activities;
-        preferences.activitiesOther = activitiesOther || preferences.activitiesOther;
-        preferences.cuisines = cuisines || preferences.cuisines;
-        preferences.travelTypes = travelTypes || preferences.travelTypes;
-        preferences.destinations = destinations || preferences.destinations;
+    preferences.activities = activities || preferences.activities;
+    preferences.activitiesOther =
+      activitiesOther || preferences.activitiesOther;
+    preferences.cuisines = cuisines || preferences.cuisines;
+    preferences.travelTypes = travelTypes || preferences.travelTypes;
+    preferences.destinations = destinations || preferences.destinations;
 
-        console.log("current preferences: ", preferences);
-        await preferences.save();
+    console.log("current preferences: ", preferences);
+    await preferences.save();
 
-        user.preferences = preferences;
-        await user.save();
-        console.log(preferences);
+    user.preferences = preferences;
+    await user.save();
+    console.log(preferences);
 
-        return res.status(200).json({ message: 'Preferences updated successfully.', preferences });
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({ message: 'Error updating preferences' });
-    }
+    return res
+      .status(200)
+      .json({ message: "Preferences updated successfully.", preferences });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Error updating preferences" });
+  }
 });
 
 //for account privacy setting
 router.post("/update-visibility", verifyToken, async (req, res) => {
-    console.log("reqbody is ", req.body);
-    const { visibility } = req.body;
-    const userId = req.user.id;
-    try {
-      const user = await User.findById(userId);
-      if (!user)
-        return res.status(404).json({ message: "User not found/invalid." });
-      user.visibility = visibility;
-      await user.save();
-      return res
-        .status(200)
-        .json({ message: "visibility updated successfully " });
-    } catch (error) {
-      console.log(error);
-      console.log("wtf");
-      return res.status(500).json({ message: "Cannot update visibility." });
-    }
+  console.log("reqbody is ", req.body);
+  const { visibility } = req.body;
+  const userId = req.user.id;
+  try {
+    const user = await User.findById(userId);
+    if (!user)
+      return res.status(404).json({ message: "User not found/invalid." });
+    user.visibility = visibility;
+    await user.save();
+    return res
+      .status(200)
+      .json({ message: "visibility updated successfully " });
+  } catch (error) {
+    console.log(error);
+    console.log("wtf");
+    return res.status(500).json({ message: "Cannot update visibility." });
+  }
 });
 
 router.get("/search-users", async (req, res) => {
-console.log("reqbody is ", req);
-//const { query} = req.query;
-const { query, exclude } = req.query;
-if (!query) return res.json([]);
+  console.log("reqbody is ", req);
+  //const { query} = req.query;
+  const { query, exclude } = req.query;
+  if (!query) return res.json([]);
 
-try {
+  try {
     const users = await User.find(
-    {
+      {
         username: { $regex: `^${query}`, $options: "i", $ne: exclude }, // Exclude logged-in user
-    },
-    { username: 1, _id: 1 }
+      },
+      { username: 1, _id: 1 }
     ).limit(10);
 
     res.json(users);
-} catch (error) {
+  } catch (error) {
     console.error("Error fetching search results:", error);
     res.status(500).json({ message: "Server error" });
-}
+  }
 });
-  
+
 // Follow a user
 router.post("/follow/:userId", verifyToken, async (req, res) => {
-const userId = req.user.id; // Current logged-in user
-const { userId: targetUserId } = req.params; // User to follow
+  const userId = req.user.id; // Current logged-in user
+  const { userId: targetUserId } = req.params; // User to follow
 
-try {
+  try {
     if (userId === targetUserId) {
-    return res.status(400).json({ message: "You cannot follow yourself" });
+      return res.status(400).json({ message: "You cannot follow yourself" });
     }
 
     const user = await User.findById(userId);
     const targetUser = await User.findById(targetUserId);
 
     if (!user || !targetUser) {
-    return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "User not found" });
     }
 
     if (targetUser.visibility === "Private") {
-    // Private account: Send a follow request notification
-    if (!targetUser.pendingFollowers.includes(userId)) {
+      // Private account: Send a follow request notification
+      if (!targetUser.pendingFollowers.includes(userId)) {
         targetUser.pendingFollowers.push(userId);
         await targetUser.save();
 
         // Create a follow request notification
         const newNotification = new Notification({
-        senderId: userId,
-        receiverId: [targetUserId], // Target user receives notification
-        type: "Follow Request",
-        followrequest: "Private",
-        content: user.username + "wants to follow you.",
-        read: false, // Unread by default
-        timestamp: new Date(), // Current timestamp
+          senderId: userId,
+          receiverId: [targetUserId], // Target user receives notification
+          type: "Follow Request",
+          followrequest: "Private",
+          content: user.username + "wants to follow you.",
+          read: false, // Unread by default
+          timestamp: new Date(), // Current timestamp
         });
 
         await newNotification.save();
 
         return res.status(200).json({ message: "Follow request sent" });
-    } else {
+      } else {
         return res.status(400).json({ message: "Follow request already sent" });
-    }
+      }
     } else {
-    if (!user.followingList.includes(targetUserId)) {
+      if (!user.followingList.includes(targetUserId)) {
         user.followingList.push(targetUserId);
         targetUser.followerList.push(userId);
         user.followingCount += 1;
@@ -299,43 +312,43 @@ try {
 
         // Create a follow request notification
         const newNotification = new Notification({
-        senderId: userId,
-        receiverId: [targetUserId], // Target user receives notification
-        type: "Follow Request",
-        followrequest: "Public",
-        content: user.username + " followed you ",
-        read: false, // Unread by default
-        timestamp: new Date(), // Current timestamp by default
+          senderId: userId,
+          receiverId: [targetUserId], // Target user receives notification
+          type: "New Follower",
+          followrequest: "Public",
+          content: user.username + " followed you ",
+          read: false, // Unread by default
+          timestamp: new Date(), // Current timestamp by default
         });
         await newNotification.save();
-    }
+      }
     }
 
     return res.status(200).json({ message: "Followed successfully" });
-} catch (error) {
+  } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Error following user" });
-}
+  }
 });
 
 // Unfollow a user
 router.post("/unfollow/:userId", verifyToken, async (req, res) => {
-const userId = req.user.id;
-const { userId: targetUserId } = req.params;
+  const userId = req.user.id;
+  const { userId: targetUserId } = req.params;
 
-try {
+  try {
     const user = await User.findById(userId);
     const targetUser = await User.findById(targetUserId);
 
     if (!user || !targetUser) {
-    return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "User not found" });
     }
 
     user.following = user.followingList.filter(
-    (id) => id.toString() !== targetUserId
+      (id) => id.toString() !== targetUserId
     );
     targetUser.followerList = targetUser.followerList.filter(
-    (id) => id.toString() !== userId
+      (id) => id.toString() !== userId
     );
     user.followingCount -= 1;
     targetUser.followerCount -= 1;
@@ -344,11 +357,10 @@ try {
     await targetUser.save();
 
     return res.status(200).json({ message: "Unfollowed successfully" });
-} catch (error) {
+  } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Error unfollowing user" });
-}
+  }
 });
-
 
 module.exports = router;
