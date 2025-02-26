@@ -220,35 +220,14 @@ function MyMap() {
       
     
     function SearchButton() {
-        const map = useMap();
+      const map = useMap();
 
-        const getPlaceDetails = async (placeId) => {
-            const response = await axios.get(`https://places.googleapis.com/v1/places/${placeId}?fields=id,displayName,location&key=${GOOGLE_MAPS_API_KEY}`)
-            return response.data.displayName.text;
-        }
-
-    // // Get display name
-    // const fetchedPlaceId = geocode.place_id;
-    // const placeDetails = await getPlaceDetails(placeId);
-    // const placeName = placeDetails || geocode.formatted_address;
-    // const address = geocode.formatted_address;
-
-    // // Pan to searched location and prepare marker
-    // map.panTo(location);
-    // setOpenInfo(false);
-    // setMarker({position:
-    //     {
-    //         lat: location.lat,
-    //         lng: location.lng
-    //     }
-    // });
-
-    // setSelectedLocation(address);
-    // setPlaceName(placeName);
-    // setPlaceId(fetchedPlaceId);
-
-
-    
+      const getPlaceDetails = async (placeId) => {
+        console.log("placeid:", placeId);
+        const response = await axios.get(`https://places.googleapis.com/v1/places/${placeId}?fields=id,displayName,location&key=${GOOGLE_MAPS_API_KEY}`)
+        return response.data.displayName.text;
+      }
+  
       const handleSearchAddress = async () => {
           if (!map) {
             console.log("Map is null");
@@ -265,7 +244,7 @@ function MyMap() {
 
           // Get display name
           const fetchedPlaceId = geocode.place_id;
-          const placeDetails = await getPlaceDetails(placeId);
+          const placeDetails = await getPlaceDetails(fetchedPlaceId);
           const placeName = placeDetails || geocode.formatted_address;
           const address = geocode.formatted_address;
           
