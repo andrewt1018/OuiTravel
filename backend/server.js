@@ -10,12 +10,12 @@ const cors = require("cors");
 
 // Specify all of the backend routes for the server
 const authRoutes = require("./routes/authRoutes");
-const uploadRoutes = require("./routes/uploadRoutes");
 const locationRoutes = require('./routes/locationRoutes');
 const userRoutes = require("./routes/userRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const notificationRoute = require('./routes/notiRoutes');
-const profileRoutes = require("./routes/profileRoutes"); //profile route for other users' profiles
+const profileRoutes = require("./routes/profileRoutes");
+const uploadRoutes = require("./routes/uploadRoutes");
 
 const router = express.Router();
 const app = express();
@@ -33,12 +33,12 @@ app.use(express.json());
 
 // Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/images", uploadRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/message", messageRoutes);
 app.use("/api/location", locationRoutes);
-app.use("/api/noti", notificationRoute)
-app.use("/api/profile", profileRoutes); //profile route
+app.use("/api/noti", notificationRoute);
+app.use("/api/profile", profileRoutes);
+app.use("/api/upload", uploadRoutes);
 
 app.listen(PORT, () => {
   // perform a database connection when server starts

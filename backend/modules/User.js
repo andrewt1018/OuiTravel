@@ -112,7 +112,7 @@ const userSchema = new mongoose.Schema({
   },
   profilePic: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "photo.files",
+    ref: "Image",
   },
   wishlist: [
     {

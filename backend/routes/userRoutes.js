@@ -9,6 +9,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../modules/User");
 const Notification = require("../modules/Notification");
 const Preferences = require("../modules/Preferences");
+const Image = require("../modules/Image");
 
 const router = express.Router();
 
@@ -366,6 +367,26 @@ router.post("/unfollow/:userId", verifyToken, async (req, res) => {
     return res.status(500).json({ message: "Error unfollowing user" });
   }
 });
+
+// Update profile pic
+router.put('/profile-pic', verifyToken, async (req, res) => {
+  try {
+    const { imageId } = req.body;
+    const userId = req.user.id;
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { profilePic: imageId },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({ message: 'Profile picture updated successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
 
 // Accept follow request
 router.post("/accept-follow/:userId", verifyToken, async (req, res) => {
