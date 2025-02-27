@@ -80,19 +80,24 @@ router.get('/user-review/:placeId', verifyToken, async (req, res) => {
         const review = await Review.findOne({ 
             location: location._id,
             user: userId 
-        }).populate('photos');
+        });
         
         console.log('Review found:', review ? 'Yes' : 'No');
+        console.log('Review photos:', review?.photos);
 
-        // Return empty response instead of 404 if no review exists
-        if (!review) {
-            return res.status(200).json({ 
-                message: 'No review found for this user and location',
-                review: null
-            });
+        // If review exists, ensure photos is an array of strings
+        if (review) {
+            // Convert any ObjectId to strings to ensure consistent format
+            const processedReview = {
+                ...review.toObject(),
+                photos: Array.isArray(review.photos) ? 
+                        review.photos.map(photo => photo.toString()) : []
+            };
+            console.log('Processed photos:', processedReview.photos);
+            res.json({ review: processedReview });
+        } else {
+            res.json({ review: null });
         }
-
-        res.status(200).json({ review });
     } catch (error) {
         console.error('Error fetching user review:', error);
         res.status(500).json({ message: error.message });
@@ -136,6 +141,11 @@ router.post('/create', verifyToken, async (req, res) => {
             return res.status(400).json({ message: 'Place ID and rating are required' });
         }
 
+        // Ensure photos is an array of strings
+        const photoIds = Array.isArray(photos) 
+            ? photos.map(photo => typeof photo === 'string' ? photo : photo.toString())
+            : [];
+
         // Find the location by placeId
         const location = await Location.findOne({ placeId });
         if (!location) {
@@ -155,7 +165,7 @@ router.post('/create', verifyToken, async (req, res) => {
             rating,
             publicComment,
             privateNotes,
-            photos: photos || []
+            photos: photoIds
         });
 
         await newReview.save();
@@ -175,7 +185,10 @@ router.post('/create', verifyToken, async (req, res) => {
 
         res.status(201).json({ 
             message: 'Review created successfully',
-            review: newReview
+            review: {
+                ...newReview.toObject(),
+                photos: newReview.photos.map(photo => photo.toString())
+            }
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -188,6 +201,11 @@ router.put('/update/:reviewId', verifyToken, async (req, res) => {
         const { reviewId } = req.params;
         const userId = req.user.id;
         const { rating, publicComment, privateNotes, photos } = req.body;
+
+        // Ensure photos is an array of strings
+        const photoIds = Array.isArray(photos) 
+            ? photos.map(photo => typeof photo === 'string' ? photo : photo.toString())
+            : [];
 
         // Find the review and check ownership
         const review = await Review.findById(reviewId);
@@ -203,7 +221,7 @@ router.put('/update/:reviewId', verifyToken, async (req, res) => {
         review.rating = rating || review.rating;
         review.publicComment = publicComment !== undefined ? publicComment : review.publicComment;
         review.privateNotes = privateNotes !== undefined ? privateNotes : review.privateNotes;
-        review.photos = photos || review.photos;
+        review.photos = photoIds;
         review.updatedAt = Date.now();
 
         await review.save();
@@ -213,7 +231,10 @@ router.put('/update/:reviewId', verifyToken, async (req, res) => {
 
         res.status(200).json({ 
             message: 'Review updated successfully',
-            review
+            review: {
+                ...review.toObject(),
+                photos: review.photos.map(photo => photo.toString())
+            }
         });
     } catch (error) {
         res.status(500).json({ message: error.message });

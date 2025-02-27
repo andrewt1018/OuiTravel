@@ -5,7 +5,7 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import BookmarkAddedIcon from "@mui/icons-material/BookmarkAdded";
-import { ExpandLess, ExpandMore, AddAPhoto, RateReview, Notes } from "@mui/icons-material";
+import { ExpandLess, ExpandMore, AddAPhoto, RateReview, Notes, Delete } from "@mui/icons-material";
 import RadioGroupRating from "./helpers/HoverRating";
 
 export default function LocationPage() {
@@ -15,15 +15,17 @@ export default function LocationPage() {
   const [isAdded, setIsAdded] = useState(false);
   const [outerExpanded, setOuterExpanded] = useState(false);
   const [innerExpanded, setInnerExpanded] = useState({
-    photos: false,
-    reviews: false,
-    notes: false,
+    photos: true,
+    reviews: true,
+    notes: true,
   });
   const [userReview, setUserReview] = useState(null);
   const [reviewText, setReviewText] = useState('');
   const [privateNotes, setPrivateNotes] = useState('');
   const [rating, setRating] = useState(0);
   const [selectedPhotos, setSelectedPhotos] = useState([]);
+  const [filePreview, setFilePreview] = useState([]);
+  const [uploading, setUploading] = useState(false);
 
   const toggleInnerSection = (section) => {
     setInnerExpanded((prev) => ({
@@ -60,6 +62,33 @@ export default function LocationPage() {
     }
   }, [placeId]);
   
+  // Handle file selection for image uploads
+  const handleFileSelect = (event) => {
+    const files = Array.from(event.target.files);
+    
+    // Create preview URLs for the selected files
+    const newPreviews = files.map(file => ({
+      file,
+      preview: URL.createObjectURL(file)
+    }));
+    
+    setFilePreview(prevPreviews => [...prevPreviews, ...newPreviews]);
+  };
+  
+  // Remove a file from preview
+  const removeFilePreview = (index) => {
+    setFilePreview(prevPreviews => {
+      // Release the object URL to prevent memory leaks
+      URL.revokeObjectURL(prevPreviews[index].preview);
+      return prevPreviews.filter((_, i) => i !== index);
+    });
+  };
+  
+  // Remove an already uploaded photo
+  const removeUploadedPhoto = (photoId) => {
+    setSelectedPhotos(prevPhotos => prevPhotos.filter(id => id !== photoId));
+  };
+  
   // Fetch user's existing review for this location
   const fetchUserReview = async () => {
     try {
@@ -74,7 +103,13 @@ export default function LocationPage() {
         setRating(review.rating || 0);
         setReviewText(review.publicComment || '');
         setPrivateNotes(review.privateNotes || '');
-        setSelectedPhotos(review.photos || []);
+        // Ensure photos is an array of strings, not objects
+        const photoArray = Array.isArray(review.photos) ? review.photos : [];
+        const processedPhotos = photoArray.map(photo => 
+          typeof photo === 'string' ? photo : (photo._id || photo.toString())
+        );
+        console.log("Processed photos:", processedPhotos); // Debug log
+        setSelectedPhotos(processedPhotos);
       } else {
         // Handle case when no review exists
         setUserReview(null);
@@ -94,16 +129,73 @@ export default function LocationPage() {
     }
   };
   
+  // Upload images and return their IDs
+  const uploadImages = async (files) => {
+    if (!files.length) return [];
+    
+    const uploadedImageIds = [];
+    const token = localStorage.getItem("token");
+    
+    try {
+      setUploading(true);
+      
+      // Upload each file individually
+      for (const fileObj of files) {
+        const formData = new FormData();
+        formData.append('image', fileObj.file);
+        
+        // Use location name in the image filename if available
+        const locationName = locationData?.name?.replace(/\s+/g, '-').toLowerCase() || 'unknown-location';
+        const originalFileName = fileObj.file.name.replace(/\.[^/.]+$/, "").replace(/\s+/g, '-').toLowerCase();
+        const timestamp = Date.now();
+        
+        formData.append('name', `${locationName}_${originalFileName}_${timestamp}`);
+        
+        const response = await axios.post(
+          "http://localhost:3001/api/upload/post-image",
+          formData,
+          {
+            headers: {
+              "x-access-token": token,
+              "Content-Type": "multipart/form-data",
+            }
+          }
+        );
+        
+        if (response.data.imageId) {
+          uploadedImageIds.push(response.data.imageId);
+        }
+      }
+      
+      return uploadedImageIds;
+    } catch (error) {
+      console.error("Error uploading images:", error);
+      alert("Failed to upload one or more images");
+      return [];
+    } finally {
+      setUploading(false);
+    }
+  };
+  
   // Submit or update review
   const handleReviewSubmit = async () => {
     try {
       const token = localStorage.getItem("token");
+      
+      // Upload any newly selected images first
+      let allPhotoIds = [...selectedPhotos]; // Start with existing photos
+      
+      if (filePreview.length > 0) {
+        const newPhotoIds = await uploadImages(filePreview);
+        allPhotoIds = [...allPhotoIds, ...newPhotoIds];
+      }
+      
       const reviewData = {
         placeId,
         rating,
         publicComment: reviewText,
         privateNotes,
-        photos: selectedPhotos
+        photos: allPhotoIds
       };
       
       if (userReview) {
@@ -122,7 +214,8 @@ export default function LocationPage() {
         );
       }
       
-      // Refresh data
+      // Clear file previews and refresh data
+      setFilePreview([]);
       fetchUserReview();
       alert(userReview ? "Review updated successfully!" : "Review created successfully!");
     } catch (error) {
@@ -130,6 +223,18 @@ export default function LocationPage() {
       alert("Error saving review. Please try again.");
     }
   };
+
+  // Reset inner expanded state when outer section is opened
+  useEffect(() => {
+    if (outerExpanded) {
+      // When outer section is expanded, expand all inner sections too
+      setInnerExpanded({
+        photos: true,
+        reviews: true,
+        notes: true,
+      });
+    }
+  }, [outerExpanded]);
 
   if (!locationData) {
     return <div className="p-8">Loading location details...</div>;
@@ -288,23 +393,72 @@ export default function LocationPage() {
                   )}
                 </div>
                 {innerExpanded.photos && (
-                  <div className="flex gap-4 mt-4">
-                    {/* Photo upload functionality would go here */}
-                    <div className="w-48 h-48 bg-gray-300 rounded-lg shadow-sm flex items-center justify-center">
-                      <input type="file" accept="image/*" className="hidden" id="photo-upload" />
-                      <label htmlFor="photo-upload" className="cursor-pointer">
-                        <AddAPhoto fontSize="large" className="text-gray-500" />
+                  <div className="mt-4">
+                    {/* Upload button */}
+                    <div className="mb-4">
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        id="photo-upload"
+                        onChange={handleFileSelect}
+                        multiple
+                      />
+                      <label 
+                        htmlFor="photo-upload" 
+                        className="cursor-pointer flex items-center justify-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-md transition-colors"
+                      >
+                        <AddAPhoto fontSize="small" /> Select Images
                       </label>
                     </div>
-                    {selectedPhotos.length > 0 && selectedPhotos.map((photo, index) => (
-                      <div key={index} className="w-48 h-48 relative">
-                        <img 
-                          src={`/uploads/${photo}`} 
-                          alt={`Review photo ${index}`} 
-                          className="w-full h-full object-cover rounded-lg shadow-sm" 
-                        />
-                      </div>
-                    ))}
+                    
+                    {/* Image previews grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                      {/* Show already uploaded photos */}
+                      {selectedPhotos.length > 0 && selectedPhotos.map((photoId, index) => (
+                        <div key={`uploaded-photo-${photoId}-${index}`} className="relative group">
+                          <img
+                            src={`http://localhost:3001/api/upload/images/${photoId}`}
+                            alt={`Review photo ${index}`}
+                            className="w-full h-48 object-cover rounded-lg shadow-sm"
+                            onError={(e) => {
+                              console.error(`Error loading image ${photoId}:`, e);
+                              e.target.onerror = null; 
+                              e.target.src = "https://via.placeholder.com/150?text=Image+Error";
+                            }}
+                          />
+                          <button 
+                            onClick={() => removeUploadedPhoto(photoId)}
+                            className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <Delete fontSize="small" />
+                          </button>
+                          <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 text-xs rounded">
+                            Uploaded
+                          </div>
+                        </div>
+                      ))}
+                      
+                      {/* Show preview of selected files */}
+                      {filePreview.map((file, index) => (
+                        <div key={`preview-${index}`} className="relative group">
+                          <img
+                            src={file.preview}
+                            alt={`Preview ${index}`}
+                            className="w-full h-48 object-cover rounded-lg shadow-sm"
+                          />
+                          <button 
+                            onClick={() => removeFilePreview(index)}
+                            className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <Delete fontSize="small" />
+                          </button>
+                          <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 text-xs rounded">
+                            Selected
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -369,9 +523,14 @@ export default function LocationPage() {
               <div className="mt-6 flex justify-end">
                 <button 
                   onClick={handleReviewSubmit}
-                  className="bg-blue-500 text-white py-2 px-6 rounded-md hover:bg-blue-600 transition-colors shadow-md"
+                  disabled={uploading}
+                  className={`py-2 px-6 rounded-md shadow-md transition-colors ${
+                    uploading 
+                      ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                      : 'bg-blue-500 text-white hover:bg-blue-600'
+                  }`}
                 >
-                  {userReview ? 'Update Review' : 'Submit Review'}
+                  {uploading ? 'Uploading...' : userReview ? 'Update Review' : 'Submit Review'}
                 </button>
               </div>
             </div>
