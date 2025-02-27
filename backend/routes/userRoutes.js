@@ -387,6 +387,8 @@ router.put('/profile-pic', verifyToken, async (req, res) => {
     res.json({ message: 'Profile picture updated successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+});
 
 // Accept follow request
 router.post("/accept-follow/:userId", verifyToken, async (req, res) => {

@@ -19,6 +19,11 @@ export default function LocationPage() {
     reviews: false,
     notes: false,
   });
+  const [userReview, setUserReview] = useState(null);
+  const [reviewText, setReviewText] = useState('');
+  const [privateNotes, setPrivateNotes] = useState('');
+  const [rating, setRating] = useState(0);
+  const [selectedPhotos, setSelectedPhotos] = useState([]);
 
   const toggleInnerSection = (section) => {
     setInnerExpanded((prev) => ({
@@ -27,10 +32,14 @@ export default function LocationPage() {
     }));
   };
 
+  // Handle rating change
+  const handleRatingChange = (newValue) => {
+    setRating(newValue);
+  };
+
   // Fetch the location data using the placeId
   useEffect(() => {
     async function fetchLocation() {
-      console.log("hi there")
       try {
         const token = localStorage.getItem("token");
         const res = await axios.get("http://localhost:3001/api/location/get-location", {
@@ -38,14 +47,89 @@ export default function LocationPage() {
           headers: { "x-access-token": token },
         });
         setLocationData(res.data.location);
+        
+        // Check if user has an existing review
+        fetchUserReview();
       } catch (error) {
         console.error("Error fetching location data:", error);
       }
     }
+    
     if (placeId) {
       fetchLocation();
     }
   }, [placeId]);
+  
+  // Fetch user's existing review for this location
+  const fetchUserReview = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.get(`http://localhost:3001/api/reviews/user-review/${placeId}`, {
+        headers: { "x-access-token": token },
+      });
+      
+      if (res.data.review) {
+        const review = res.data.review;
+        setUserReview(review);
+        setRating(review.rating || 0);
+        setReviewText(review.publicComment || '');
+        setPrivateNotes(review.privateNotes || '');
+        setSelectedPhotos(review.photos || []);
+      } else {
+        // Handle case when no review exists
+        setUserReview(null);
+        setRating(0);
+        setReviewText('');
+        setPrivateNotes('');
+        setSelectedPhotos([]);
+      }
+    } catch (error) {
+      console.error("Error fetching user review:", error);
+      // Reset form on error
+      setUserReview(null);
+      setRating(0);
+      setReviewText('');
+      setPrivateNotes('');
+      setSelectedPhotos([]);
+    }
+  };
+  
+  // Submit or update review
+  const handleReviewSubmit = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const reviewData = {
+        placeId,
+        rating,
+        publicComment: reviewText,
+        privateNotes,
+        photos: selectedPhotos
+      };
+      
+      if (userReview) {
+        // Update existing review
+        await axios.put(
+          `http://localhost:3001/api/reviews/update/${userReview._id}`, 
+          reviewData,
+          { headers: { "x-access-token": token } }
+        );
+      } else {
+        // Create new review
+        await axios.post(
+          "http://localhost:3001/api/reviews/create", 
+          reviewData,
+          { headers: { "x-access-token": token } }
+        );
+      }
+      
+      // Refresh data
+      fetchUserReview();
+      alert(userReview ? "Review updated successfully!" : "Review created successfully!");
+    } catch (error) {
+      console.error("Error saving review:", error);
+      alert("Error saving review. Please try again.");
+    }
+  };
 
   if (!locationData) {
     return <div className="p-8">Loading location details...</div>;
@@ -182,7 +266,7 @@ export default function LocationPage() {
                   Rate this Location
                 </h3>
                 <div className="w-full flex justify-center">
-                  <RadioGroupRating />
+                  <RadioGroupRating value={rating} onChange={handleRatingChange} />
                 </div>
               </div>
 
@@ -205,8 +289,22 @@ export default function LocationPage() {
                 </div>
                 {innerExpanded.photos && (
                   <div className="flex gap-4 mt-4">
-                    <div className="w-48 h-48 bg-gray-300 rounded-lg shadow-sm"></div>
-                    <div className="w-48 h-48 bg-gray-300 rounded-lg shadow-sm"></div>
+                    {/* Photo upload functionality would go here */}
+                    <div className="w-48 h-48 bg-gray-300 rounded-lg shadow-sm flex items-center justify-center">
+                      <input type="file" accept="image/*" className="hidden" id="photo-upload" />
+                      <label htmlFor="photo-upload" className="cursor-pointer">
+                        <AddAPhoto fontSize="large" className="text-gray-500" />
+                      </label>
+                    </div>
+                    {selectedPhotos.length > 0 && selectedPhotos.map((photo, index) => (
+                      <div key={index} className="w-48 h-48 relative">
+                        <img 
+                          src={`/uploads/${photo}`} 
+                          alt={`Review photo ${index}`} 
+                          className="w-full h-full object-cover rounded-lg shadow-sm" 
+                        />
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -233,6 +331,8 @@ export default function LocationPage() {
                     placeholder="Write your review here..."
                     className="w-full p-4 border border-gray-300 rounded-md text-base shadow-sm mt-4"
                     rows={4}
+                    value={reviewText}
+                    onChange={(e) => setReviewText(e.target.value)}
                   />
                 )}
               </div>
@@ -259,8 +359,20 @@ export default function LocationPage() {
                     placeholder="Write your personal notes here..."
                     className="w-full p-4 border border-gray-300 rounded-md text-base shadow-sm mt-4"
                     rows={4}
+                    value={privateNotes}
+                    onChange={(e) => setPrivateNotes(e.target.value)}
                   />
                 )}
+              </div>
+              
+              {/* Submit button */}
+              <div className="mt-6 flex justify-end">
+                <button 
+                  onClick={handleReviewSubmit}
+                  className="bg-blue-500 text-white py-2 px-6 rounded-md hover:bg-blue-600 transition-colors shadow-md"
+                >
+                  {userReview ? 'Update Review' : 'Submit Review'}
+                </button>
               </div>
             </div>
           )}
