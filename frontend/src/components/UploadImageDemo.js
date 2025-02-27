@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from "react-router-dom";
+import {getUser} from "./helpers/user-verification"
 import axios from 'axios';
-import './UploadImageDemo.css';
+import './styles/UploadImageDemo.css';
 
 function UploadImageDemo() {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -8,6 +10,26 @@ function UploadImageDemo() {
   const [uploadStatus, setUploadStatus] = useState('');
   const [error, setError] = useState('');
   const [images, setImages] = useState([]);
+  const [userData, setUserData] = useState({});
+  const [profilePicUrl, setProfilePicUrl] = useState('');
+  const navigate = useNavigate();
+
+    useEffect(() => {
+      /** Verify user and fetch profile pic */
+      const verifyUser = async () => {
+        const user = await getUser();
+        if (!user) {
+            alert("User not logged in!")
+            navigate("/login")
+            return;
+        }
+        setUserData(user);
+        if (user.profilePic) {
+          fetchProfilePic(user.profilePic);
+        }
+      }
+      verifyUser();
+    }, []);
 
   // Fetch existing images when component mounts
   useEffect(() => {
@@ -44,6 +66,41 @@ function UploadImageDemo() {
       setImages(response.data);
     } catch (err) {
       setError('Failed to fetch images: ' + (err.response?.data?.message || err.message));
+    }
+  };
+
+  const fetchProfilePic = async (imageId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`http://localhost:3001/api/upload/get-image`, {
+        headers: {
+          'x-access-token': token
+        }
+      });
+      const profilePic = response.data.find(img => img.id === imageId);
+      if (profilePic) {
+        setProfilePicUrl(profilePic.imageUrl);
+      }
+    } catch (err) {
+      setError('Failed to fetch profile picture');
+    }
+  };
+
+  const handleSetProfilePic = async (imageId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.put(`http://localhost:3001/api/user/profile-pic`, 
+        { imageId },
+        {
+          headers: {
+            'x-access-token': token
+          }
+        }
+      );
+      setProfilePicUrl(images.find(img => img.id === imageId)?.imageUrl);
+      setUploadStatus('Profile picture updated successfully!');
+    } catch (err) {
+      setError('Failed to set profile picture: ' + (err.response?.data?.message || err.message));
     }
   };
 
@@ -115,6 +172,22 @@ function UploadImageDemo() {
     <div className="upload-image-container">
       <h2>Image Upload Demo</h2>
       
+      {/* Profile Picture Section */}
+      <div className="profile-section">
+        <h3>Current Profile Picture</h3>
+        <div className="profile-pic-container">
+          {profilePicUrl ? (
+            <img 
+              src={profilePicUrl} 
+              alt="Profile" 
+              className="profile-pic" 
+            />
+          ) : (
+            <div className="no-profile-pic">No profile picture set</div>
+          )}
+        </div>
+      </div>
+
       {/* Upload Form */}
       <div className="upload-section">
         <form onSubmit={handleUpload}>
@@ -171,6 +244,12 @@ function UploadImageDemo() {
                   className="gallery-image" 
                 />
                 <p className="image-name">{image.name}</p>
+                <button 
+                  className="set-profile-pic-button"
+                  onClick={() => handleSetProfilePic(image.id)}
+                >
+                  Set as Profile Picture
+                </button>
               </div>
             ))}
           </div>
