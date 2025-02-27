@@ -168,11 +168,11 @@ router.post("/edit-profile", verifyToken, async (req, res) => {
 });
 
 /* Get user preferences to fill the preferences page */
-router.get('/getPreferences', verifyToken, async(req, res) => {
-    const userId = req.user.id;
-    try {
-        const preferences = await Preferences.findOne({userId: userId});
-        console.log(preferences);
+router.get("/getPreferences", verifyToken, async (req, res) => {
+  const userId = req.user.id;
+  try {
+    const preferences = await Preferences.findOne({ userId: userId });
+    console.log(preferences);
 
     return res.status(200).json({ preferences });
   } catch (error) {
@@ -182,10 +182,11 @@ router.get('/getPreferences', verifyToken, async(req, res) => {
 });
 
 /* Edit preferences */
-router.post('/preferences', verifyToken, async (req, res) => {
-    const userId = req.user.id;
-    const { activities, activitiesOther, cuisines, travelTypes,  destinations } = req.body.preferences;
-    console.log(activities, activitiesOther, cuisines, travelTypes,  destinations);
+router.post("/preferences", verifyToken, async (req, res) => {
+  const userId = req.user.id;
+  const { activities, activitiesOther, cuisines, travelTypes, destinations } =
+    req.body.preferences;
+  console.log(activities, activitiesOther, cuisines, travelTypes, destinations);
 
   try {
     const user = await User.findById(userId);
@@ -283,7 +284,9 @@ router.post("/follow/:userId", verifyToken, async (req, res) => {
       // Private account: Send a follow request notification
       if (!targetUser.pendingFollowers.includes(userId)) {
         targetUser.pendingFollowers.push(userId);
+        user.tryingToFollowList.push(targetUserId);
         await targetUser.save();
+        await user.save();
 
         // Create a follow request notification
         const newNotification = new Notification({
@@ -364,7 +367,5 @@ router.post("/unfollow/:userId", verifyToken, async (req, res) => {
     return res.status(500).json({ message: "Error unfollowing user" });
   }
 });
-
-
 
 module.exports = router;

@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 
 const positionSchema = new mongoose.Schema({
   lat: {
@@ -39,31 +39,47 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
   firstName: {
-    type: String
+    type: String,
   },
   lastName: {
-    type: String
+    type: String,
   },
-  followerList: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User', // Self-reference for followers
-  }],
-  followingList: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User', // Self-reference for following
-  }],
-  pendingFollowers: [{
+  followerList: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User", // Self-reference for followers
+    },
+  ],
+  followingList: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User", // Self-reference for following
+    },
+  ],
+  pendingFollowers: [
+    {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User", // Self-reference for pending followers when account is private
-  }],
-  blockedList: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User', // Self-reference for following
-  }],
-  blockedByList: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User', // Self-reference for following
-  }],
+    },
+  ],
+  tryingToFollowList: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User", // Self-reference for private profiles that user is requesting to follow
+    },
+  ],
+  blockedList: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User", // Self-reference for following
+    },
+  ],
+  blockedByList: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User", // Self-reference for following
+    },
+  ],
   followerCount: {
     type: Number,
     default: 0,
@@ -111,7 +127,7 @@ const userSchema = new mongoose.Schema({
   ],
   preferences: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Preferences"
+    ref: "Preferences",
   },
   visibility: {
     type: String,
