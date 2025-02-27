@@ -63,36 +63,46 @@ const upload = multer({
     }
 });
 
-// Get image by ID
+// Get image by ID - with additional debugging and error handling
 router.get('/images/:id', async (req, res) => {
     try {
-        console.log(`Fetching image with ID: ${req.params.id}`);
+        const imageId = req.params.id;
+        console.log(`Fetching image with ID: ${imageId}`);
         
         // Check if the ID is valid
-        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-            console.log('Invalid image ID format');
+        if (!mongoose.Types.ObjectId.isValid(imageId)) {
+            console.log('Invalid image ID format:', imageId);
             return res.status(400).send('Invalid image ID format');
         }
         
-        const image = await Image.findById(req.params.id);
+        const image = await Image.findById(imageId);
         
         if (!image) {
-            console.log(`Image not found for ID: ${req.params.id}`);
+            console.log(`Image not found for ID: ${imageId}`);
             return res.status(404).send('Image not found');
         }
         
-        // Verify the image data is available
-        if (!image.img || !image.img.data || !image.img.contentType) {
-            console.log(`Image data missing for ID: ${req.params.id}`);
+        // Verify the image data is available and has size
+        if (!image.img || !image.img.data || image.img.data.length === 0) {
+            console.log(`Image data missing or empty for ID: ${imageId}`);
             return res.status(404).send('Image data is corrupted or missing');
         }
         
-        console.log(`Found image with content type: ${image.img.contentType}`);
-        res.set('Content-Type', image.img.contentType);
+        // Log some info about the image
+        console.log(`Found image: ID=${imageId}, Type=${image.img.contentType}, Size=${image.img.data.length} bytes`);
+        
+        // Ensure content type exists or default to jpeg
+        const contentType = image.img.contentType || 'image/jpeg';
+        
+        // Set cache headers to improve performance
+        res.set('Cache-Control', 'public, max-age=86400'); // Cache for one day
+        res.set('Content-Type', contentType);
+        
+        // Send the image data
         res.send(image.img.data);
     } catch (error) {
-        console.error(`Error fetching image: ${error.message}`);
-        res.status(500).json({ message: error.message });
+        console.error(`Error fetching image (${req.params.id}): ${error.message}`);
+        res.status(500).send('Server error while fetching image');
     }
 });
 
