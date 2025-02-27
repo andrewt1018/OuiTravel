@@ -90,4 +90,35 @@ router.get('/check-location/:placeId', async (req, res) => {
   }
 });
 
+// Add trending locations endpoint
+router.get('/trending', verifyToken, async (req, res) => {
+  try {
+    // Find locations with reviews and sort by average rating (highest first)
+    const trendingLocations = await Location.aggregate([
+      { $match: { reviews: { $exists: true, $ne: [] } } },
+      { $addFields: { 
+        reviewCount: { $size: "$reviews" }, 
+        avgRating: { $avg: "$ratings" } 
+      }},
+      { $sort: { avgRating: -1, reviewCount: -1 } },
+      { $limit: 10 }
+    ]);
+
+    if (!trendingLocations || trendingLocations.length === 0) {
+      return res.status(200).json({ 
+        message: 'No trending locations found.', 
+        locations: [] 
+      });
+    }
+
+    return res.status(200).json({ 
+      message: 'Trending locations retrieved successfully.', 
+      locations: trendingLocations 
+    });
+  } catch (error) {
+    console.error("Error retrieving trending locations:", error);
+    return res.status(500).json({ message: 'Error retrieving trending locations.' });
+  }
+});
+
 module.exports = router;
