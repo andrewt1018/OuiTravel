@@ -21,7 +21,7 @@
 }
 
 .usernameInput {
-    padding-bottom: 10px;
+    width: 150px;
 }
 
 .passwordInput {
