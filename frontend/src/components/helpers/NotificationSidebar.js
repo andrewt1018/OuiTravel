@@ -105,6 +105,13 @@ const NotificationSidebar = ({ isNotificationsVisible, closePanel }) => {
 
       // If accepted, call the follow route
       if (action === "accept") {
+        // const loggedInUser = await getUser();
+        // if (!loggedInUser) {
+        //   alert("User not logged in!");
+        //   navigate("/login");
+        //   return;
+        // }
+
         await axios.post(
           `http://localhost:3001/api/user/acceptFollow/${noti._id}`,
           {},
