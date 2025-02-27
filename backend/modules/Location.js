@@ -42,7 +42,7 @@ const locationSchema = new mongoose.Schema({
   },
   images: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: "photo.files"
+    ref: "Image"
   }],
   reviews: [{
     type: mongoose.Schema.Types.ObjectId,
