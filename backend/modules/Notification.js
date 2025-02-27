@@ -37,11 +37,16 @@ const NotificationSchema = new mongoose.Schema({
   },
   read: {
     type: Boolean,
-    default: false
+    default: false,
   },
   timestamp: {
     type: Date,
     default: Date.now,
+  },
+  requestStatus: {
+    type: String,
+    enum: ["Accepted", "Rejected", "NoActionYet"],
+    required: false,
   },
 });
 
