@@ -66,5 +66,28 @@ router.post('/post-location', verifyToken, async (req, res) => {
   }
 });
 
+// Add this route to check if a location exists by placeId
+router.get('/check-location/:placeId', async (req, res) => {
+  try {
+    const { placeId } = req.params;
+    const location = await Location.findOne({ placeId });
+    
+    if (!location) {
+      return res.status(404).json({ exists: false, message: 'Location not found' });
+    }
+    
+    return res.status(200).json({ 
+      exists: true, 
+      location: {
+        id: location._id,
+        placeId: location.placeId,
+        name: location.name
+      } 
+    });
+  } catch (error) {
+    console.error('Error checking location:', error);
+    return res.status(500).json({ message: error.message });
+  }
+});
 
 module.exports = router;
