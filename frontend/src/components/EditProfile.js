@@ -16,6 +16,8 @@ const EditProfile = () => {
     const [newPassword, setNewPassword] = useState('');
     const [retypePassword, setRetypePassword] = useState('');
     const [passwordError, setPasswordError] = useState('');
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [profilePicPreview, setProfilePicPreview] = useState(null);
     const navigate = useNavigate();
 
     const verifyUser = async () => {
@@ -36,16 +38,80 @@ const EditProfile = () => {
         setNewGender(user.gender);
         const formattedDOB = user.dob ? new Date(user.dob).toISOString().split('T')[0] : '';
         setNewDOB(formattedDOB);
+        
+        // If user has a profile pic, fetch and display it
+        if (user.profilePic) {
+            try {
+                const token = localStorage.getItem("token");
+                const response = await axios.get(`http://localhost:3001/api/upload/get-image?id=${user.profilePic}`, {
+                    headers: { 'x-access-token': token }
+                });
+                if (response.data && response.data.imageUrl) {
+                    setProfilePicPreview(response.data.imageUrl);
+                }
+            } catch (error) {
+                console.error("Error fetching profile image:", error);
+            }
+        }
     };
 
     useEffect(() => {
         verifyUser();
     }, []);
 
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setSelectedFile(file);
+            // Create preview
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setProfilePicPreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const uploadProfilePicture = async () => {
+        if (!selectedFile) return null;
+        
+        try {
+            const formData = new FormData();
+            formData.append('image', selectedFile);
+            formData.append('name', 'profile_pic_@' + newUsername + ':' + selectedFile.name);
+            
+            const token = localStorage.getItem("token");
+            const response = await axios.post(
+                'http://localhost:3001/api/upload/post-image',
+                formData,
+                {
+                    headers: { 
+                        'x-access-token': token,
+                        'Content-Type': 'multipart/form-data'
+                    }
+                }
+            );
+            return response.data.imageId;
+        } catch (error) {
+            console.error("Error uploading profile picture:", error);
+            return null;
+        }
+    };
+
     const handleSubmit = async (event) => {
+        event.preventDefault();
+        
+        // Upload profile picture if a new file is selected
+        let profilePicId = newProfilePic;
+        if (selectedFile) {
+            const uploadedId = await uploadProfilePicture();
+            if (uploadedId) {
+                profilePicId = uploadedId;
+            }
+        }
         
         const formData = {
-            newProfilePic: newProfilePic,
+            newProfilePic: profilePicId,
             newFirstName: newFirstName,
             newLastName: newLastName,
             newUsername: newUsername,
@@ -53,7 +119,6 @@ const EditProfile = () => {
             newBio: newBio,
             newGender: newGender,
             newDOB: newDOB,
-            
         };
         console.log(formData);
 
@@ -69,7 +134,7 @@ const EditProfile = () => {
             
         } catch (error) {
             console.error("Error updating profile: ", error);
-            alert("An error occured. Try again later.");
+            alert("An error occurred. Try again later.");
         }
     };
 
@@ -121,13 +186,21 @@ const EditProfile = () => {
             <div className="flex items-center gap-6 mb-8">
                 <img
                     className="h-16 w-16 object-cover rounded-full"
-                    src="/selena.jpg"
+                    src={profilePicPreview || "/selena.jpg"}
                     alt="Profile Avatar"
                 />
                 <div className="flex flex-col items-start">
                     <span className='text-xl font-semibold text-gray-800'>{newUsername}</span>
-                    <button className="inline-flex text-sm font-semibold text-blue-600 underline decoration-2">Change photo</button>
-                {/* <span className="text-sm text-gray-500">For best results, upload an image axa or larger.</span> */}
+                    <label className="inline-flex text-sm font-semibold text-blue-600 underline decoration-2 cursor-pointer">
+                        Change photo
+                        <input 
+                            type="file" 
+                            accept="image/*" 
+                            className="hidden"
+                            onChange={handleFileChange} 
+                        />
+                    </label>
+                    <span className="text-sm text-gray-500">For best results, use a square image.</span>
                 </div>
             </div>
 

@@ -63,19 +63,32 @@ const upload = multer({
 
 router.get('/get-image', verifyToken, async (req, res) => {
     try {
-        const images = await Image.find({});
+        let query = {};
+        if (req.query.id) {
+            query = { _id: req.query.id };
+        }
+        
+        const images = await Image.find(query);
+        
+        if (!images || images.length === 0) {
+            return res.status(404).json({ message: 'Image not found' });
+        }
+        
         // Transform the binary data to base64 for frontend use
         const processedImages = images.map(image => ({
             id: image._id,
             name: image.name,
             imageUrl: `data:${image.img.contentType};base64,${image.img.data.toString('base64')}`
         }));
+        
+        if (req.query.id) {
+            return res.json(processedImages[0]);
+        }
         res.json(processedImages);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 });
-
 
 router.post('/post-image', upload.single('image'), verifyToken, async (req, res) => {
     try {
