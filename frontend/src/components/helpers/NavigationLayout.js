@@ -44,7 +44,7 @@ const toggleNotifications = () => {
     { path: '', label: 'Journals', icon: <DriveFileRenameOutlineIcon /> },
     { path: '/messages', label: 'Messages', icon: <ForumIcon /> },
     { path: '', label: 'Notifications', icon: <NotificationsIcon />, onClick: toggleNotifications },
-    { path: '/profile', label: 'Profile', icon: <PersonIcon /> },
+    { path: '/profile', label: 'Profile', icon: <PersonIcon /> }
 
   ];
 
