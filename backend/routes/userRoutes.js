@@ -293,10 +293,10 @@ router.post("/follow/:userId", verifyToken, async (req, res) => {
           senderId: userId,
           receiverId: [targetUserId], // Target user receives notification
           type: "Follow Request",
-          followrequest: "Private",
-          content: user.username + "wants to follow you.",
+          content: user.username + " wants to follow you.",
           read: false, // Unread by default
           timestamp: new Date(), // Current timestamp
+          requestStatus: "NoActionYet",
         });
 
         await newNotification.save();
@@ -320,7 +320,6 @@ router.post("/follow/:userId", verifyToken, async (req, res) => {
           senderId: userId,
           receiverId: [targetUserId], // Target user receives notification
           type: "New Follower",
-          followrequest: "Public",
           content: user.username + " followed you ",
           read: false, // Unread by default
           timestamp: new Date(), // Current timestamp by default
@@ -365,6 +364,59 @@ router.post("/unfollow/:userId", verifyToken, async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Error unfollowing user" });
+  }
+});
+
+// Accept follow request
+router.post("/accept-follow/:userId", verifyToken, async (req, res) => {
+  const userId = req.user.id;
+  const targetUserId = req.params.userId;
+
+  try {
+    const user = await User.findById(userId);
+    const targetUser = await User.findById(targetUserId);
+
+    if (!user || !targetUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Remove from pending followers and add to followers
+    user.pendingFollowers = user.pendingFollowers.filter(
+      (id) => id !== targetUserId
+    );
+    user.followers.push(targetUserId);
+    targetUser.following.push(userId);
+
+    await user.save();
+    await targetUser.save();
+
+    return res.status(200).json({ message: "Follow request accepted" });
+  } catch (error) {
+    return res.status(500).json({ message: "Error accepting follow request" });
+  }
+});
+
+// Reject follow request
+router.post("/reject-follow/:userId", verifyToken, async (req, res) => {
+  const userId = req.user.id;
+  const targetUserId = req.params.userId;
+
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Remove from pending followers
+    user.pendingFollowers = user.pendingFollowers.filter(
+      (id) => id !== targetUserId
+    );
+    await user.save();
+
+    return res.status(200).json({ message: "Follow request rejected" });
+  } catch (error) {
+    return res.status(500).json({ message: "Error rejecting follow request" });
   }
 });
 
