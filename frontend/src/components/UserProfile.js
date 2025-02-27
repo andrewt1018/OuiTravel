@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
 import axios from "axios";
-import {getUser} from "./helpers/user-verification"
+import { getUser } from "./helpers/user-verification";
 import "./styles/general.css";
 import {
   Box,
@@ -74,8 +74,8 @@ export default function UserProfile() {
       try {
         const loggedInUser = await getUser();
         if (!loggedInUser) {
-          alert("User not logged in!")
-          navigate("/login")
+          alert("User not logged in!");
+          navigate("/login");
           return;
         }
 
@@ -97,13 +97,17 @@ export default function UserProfile() {
         const isUserFollowing = res.data.followerList.includes(
           loggedInUser._id
         );
+        const isRequested = loggedInUser.tryingToFollowList.includes(
+          res.data._id
+        );
+
         console.log("hello do i follow him ", isUserFollowing);
         console.log("did i sent request ", isSentFollow);
 
         setIsFollowing(isUserFollowing); //set the text of button when revisit the profile
         if (isUserFollowing) {
           setFollowText("Following");
-        } else if (isSentFollow) {
+        } else if (isRequested) {
           setFollowText("Follow Requested");
         } else {
           setFollowText("Follow");
@@ -133,15 +137,11 @@ export default function UserProfile() {
           {/* Followers & Following */}
           <div className="flex gap-6 mt-4 text-lg text-gray-600">
             <div className="flex items-center gap-2">
-              <strong className="text-gray-900">
-                {followerCount}
-              </strong>
+              <strong className="text-gray-900">{followerCount}</strong>
               <span>Followers</span>
             </div>
             <div className="flex items-center gap-2">
-              <strong className="text-gray-900">
-                {followingCount}
-              </strong>
+              <strong className="text-gray-900">{followingCount}</strong>
               <span>Following</span>
             </div>
 
