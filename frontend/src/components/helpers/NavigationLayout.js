@@ -12,6 +12,7 @@ import ForumIcon from '@mui/icons-material/Forum';
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import SettingsIcon from '@mui/icons-material/Settings';
+import LogoutIcon from '@mui/icons-material/Logout';
 // Icons can be found here: https://mui.com/material-ui/material-icons/
 
 const NavigationLayout = ({ children, showHeader = false, headerSearchBar = null, headerSearchButton = null}) => {
@@ -44,8 +45,8 @@ const toggleNotifications = () => {
     { path: '', label: 'Journals', icon: <DriveFileRenameOutlineIcon /> },
     { path: '/messages', label: 'Messages', icon: <ForumIcon /> },
     { path: '', label: 'Notifications', icon: <NotificationsIcon />, onClick: toggleNotifications },
-    { path: '/profile', label: 'Profile', icon: <PersonIcon /> }
-
+    { path: '/profile', label: 'Profile', icon: <PersonIcon /> },
+    { path: '/logout', label: 'Logout', icon: <LogoutIcon /> }
   ];
 
   const toggleSidebar = () => {
