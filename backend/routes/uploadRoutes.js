@@ -40,7 +40,9 @@ const storage = multer.diskStorage({
         cb(null, 'uploads')
     },
     filename: (req, file, cb) => {
-        cb(null, file.fieldname + '-' + Date.now())
+        // Use a more descriptive filename with original extension
+        const fileExtension = path.extname(file.originalname) || '';
+        cb(null, `${file.fieldname}-${Date.now()}${fileExtension}`);
     }
 });
 
@@ -58,6 +60,39 @@ const upload = multer({
     fileFilter: fileFilter,
     limits: {
         fileSize: 5 * 1024 * 1024 // 5MB
+    }
+});
+
+// Get image by ID
+router.get('/images/:id', async (req, res) => {
+    try {
+        console.log(`Fetching image with ID: ${req.params.id}`);
+        
+        // Check if the ID is valid
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            console.log('Invalid image ID format');
+            return res.status(400).send('Invalid image ID format');
+        }
+        
+        const image = await Image.findById(req.params.id);
+        
+        if (!image) {
+            console.log(`Image not found for ID: ${req.params.id}`);
+            return res.status(404).send('Image not found');
+        }
+        
+        // Verify the image data is available
+        if (!image.img || !image.img.data || !image.img.contentType) {
+            console.log(`Image data missing for ID: ${req.params.id}`);
+            return res.status(404).send('Image data is corrupted or missing');
+        }
+        
+        console.log(`Found image with content type: ${image.img.contentType}`);
+        res.set('Content-Type', image.img.contentType);
+        res.send(image.img.data);
+    } catch (error) {
+        console.error(`Error fetching image: ${error.message}`);
+        res.status(500).json({ message: error.message });
     }
 });
 
@@ -95,22 +130,37 @@ router.post('/post-image', upload.single('image'), verifyToken, async (req, res)
         if (!req.file) {
             return res.status(400).json({ message: 'No image file provided' });
         }
+        
         // file saved to directory by multer
         const filePath = path.join(uploadsDir, req.file.filename);
+        
+        // Get name from request or use a default
+        const imageName = req.body.name || `image-${Date.now()}`;
+        
+        // Read file data
+        const imageData = fs.readFileSync(filePath);
+        
+        console.log(`Creating image record with name: ${imageName}, mime type: ${req.file.mimetype}, size: ${imageData.length} bytes`);
+        
         // create new image in database
         const newImage = new Image({
-            name: req.body.name || req.file.originalname,
+            name: imageName,
             img: {
-                data: fs.readFileSync(filePath),
+                data: imageData,
                 contentType: req.file.mimetype
             }
         });
-        await newImage.save();
+        
+        const savedImage = await newImage.save();
+        console.log(`Image saved with ID: ${savedImage._id}`);
+        
         // Clean up uploaded file
         fs.unlinkSync(filePath);
+        
         res.status(201).json({ 
             message: 'Image uploaded successfully',
-            imageId: newImage._id
+            imageId: savedImage._id.toString(),
+            name: savedImage.name
         });
     } catch (error) {
         // Clean up file if it exists
@@ -120,6 +170,32 @@ router.post('/post-image', upload.single('image'), verifyToken, async (req, res)
                 fs.unlinkSync(filePath);
             }
         }
+        console.error(`Error uploading image: ${error.message}`);
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Test route to verify an image exists and has proper data
+router.get('/verify-image/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const image = await Image.findById(id);
+        
+        if (!image) {
+            return res.status(404).json({ message: 'Image not found' });
+        }
+        
+        // Send basic image metadata without the binary data
+        res.json({
+            imageExists: true,
+            imageId: image._id,
+            name: image.name,
+            contentType: image.img.contentType,
+            dataSize: image.img.data ? image.img.data.length : 0,
+            hasData: !!image.img.data,
+            uploadDate: image.uploadDate
+        });
+    } catch (error) {
         res.status(500).json({ message: error.message });
     }
 });
