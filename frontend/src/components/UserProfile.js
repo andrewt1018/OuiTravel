@@ -24,6 +24,7 @@ export default function UserProfile() {
   const [isPrivate, setIsPrivate] = useState(false);
   const [followText, setFollowText] = useState("Follow");
   const [isSentFollow, setIsSentFollow] = useState(false);
+  const [profilePic, setProfilePic] = useState(null);
   const navigate = useNavigate();
 
   const handleFollow = async () => {
@@ -108,13 +109,25 @@ export default function UserProfile() {
         setIsFollowing(isUserFollowing); //set the text of button when revisit the profile
         if (isUserFollowing) {
           setFollowText("Following");
-          //setIsPrivate(false);
         } else if (isRequested) {
           setFollowText("Follow Requested");
-          //setIsPrivate(true);
         } else {
           setFollowText("Follow");
-          //setIsPrivate(true);
+        }
+        
+        // Fetch user profile pic if available
+        if (res.data.profilePic) {
+          try {
+            const token = localStorage.getItem("token");
+            const response = await axios.get(`http://localhost:3001/api/upload/get-image?id=${res.data.profilePic}`, {
+                headers: { 'x-access-token': token }
+            });
+            if (response.data && response.data.imageUrl) {
+                setProfilePic(response.data.imageUrl);
+            }
+          } catch (error) {
+              console.error("Error fetching profile image:", error);
+          }
         }
       } catch (error) {
         console.error("Error fetching user profile:", error);
@@ -129,11 +142,22 @@ export default function UserProfile() {
       <div className="h-96 bg-gradient-to-r from-blue-100 to-indigo-100 p-8 flex items-center gap-8 shadow-md">
         {/* Profile Picture */}
         <div className="w-48 h-48 bg-gray-300 rounded-full flex items-center justify-center shadow-lg">
-          <span className="text-gray-500 text-lg">Profile</span>
+          { profilePic ? 
+            (<img
+                className="h-48 w-48 object-cover rounded-full"
+                src={profilePic}
+                alt="Profile Avatar"
+            />)
+            : (<img
+                className="h-48 w-48 object-contain rounded-full"
+                src={"/default-avatar.png"}
+                alt="Profile Avatar"
+            />)
+          }
         </div>
         {/* User Info */}
         <div className="flex-1 flex flex-col">
-          <h1 className="text-5xl font-bold pb-4">{userData.fullName}</h1>
+          <h1 className="text-5xl font-bold pb-4">{userData.firstName} {userData.lastName}</h1>
           <p className="text-2xl text-gray-700">@{userData.username}</p>
           <p className="mt-3 text-lg text-gray-600 max-w-lg leading-relaxed">
             {userData.bio}
@@ -158,7 +182,6 @@ export default function UserProfile() {
               onClick={handleFollow}
               disabled={followText === "Follow Requested"}
             >
-              {/* {isFollowing ? "Following" : "Follow"} */}
               {followText}
             </button>
           </div>
