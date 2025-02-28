@@ -17,7 +17,6 @@ const notificationRoute = require('./routes/notiRoutes');
 const profileRoutes = require("./routes/profileRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
 const reviewRoutes = require('./routes/reviewRoutes');
-const itineraryRoutes = require('./routes/itineraryRoutes');
 
 const router = express.Router();
 const app = express();
@@ -42,7 +41,6 @@ app.use("/api/noti", notificationRoute);
 app.use("/api/profile", profileRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use('/api/reviews', reviewRoutes);
-app.use('/api/itinerary', itineraryRoutes);
 
 app.listen(PORT, () => {
   // perform a database connection when server starts

@@ -24,6 +24,7 @@ export default function LocationPage() {
   const [privateNotes, setPrivateNotes] = useState('');
   const [rating, setRating] = useState(0);
   const [selectedPhotos, setSelectedPhotos] = useState([]);
+  const [wishlist, setWishlist] = useState([]);
 
   const toggleInnerSection = (section) => {
     setInnerExpanded((prev) => ({
@@ -37,8 +38,56 @@ export default function LocationPage() {
     setRating(newValue);
   };
 
+  const addToWishlist = async () => {
+    setIsBookmarked(true)
+    try {
+        const token = localStorage.getItem("token");
+        const res = await axios.post("http://localhost:3001/api/user/post-wishlist", 
+            { placeId },
+            { headers: { "x-access-token": token } }
+        );
+
+        alert(res.data.message);
+    } catch (error) {
+        console.error("Error adding to wishlist:", error);
+        alert(error.response?.data?.message || "Could not add to wishlist.");
+    }
+};
+
+const delFromWishlist = async () => {
+  setIsBookmarked(false);
+  try {
+      const token = localStorage.getItem("token");
+      const res = await axios.delete(`http://localhost:3001/api/user/del-wishlist/${placeId}`, 
+          { headers: { "x-access-token": token } }
+      );
+
+      alert(res.data.message);
+  } catch (error) {
+      console.error("Error removing from wishlist:", error);
+      alert(error.response?.data?.message || "Could not remove from wishlist.");
+  }
+};
+
+const fetchWishlistAndCheck = async () => {
+  try {
+      const token = localStorage.getItem("token");
+      const res = await axios.get("http://localhost:3001/api/user/get-wishlist", 
+          { headers: { "x-access-token": token } }
+      );
+
+      setWishlist(res.data.wishlist);
+
+      const isWishlisted = res.data.wishlist.some(item => item.placeId === placeId);
+      setIsBookmarked(isWishlisted);
+  } catch (error) {
+      console.error("Error fetching wishlist:", error);
+  }
+};
+
   // Fetch the location data using the placeId
   useEffect(() => {
+    console.log("placeId from useParams:", placeId);
     async function fetchLocation() {
       try {
         const token = localStorage.getItem("token");
@@ -57,6 +106,7 @@ export default function LocationPage() {
     
     if (placeId) {
       fetchLocation();
+      fetchWishlistAndCheck();
     }
   }, [placeId]);
   
@@ -164,13 +214,13 @@ export default function LocationPage() {
             )}
             {isBookmarked ? (
               <BookmarkAddedIcon
-                onClick={() => setIsBookmarked(false)}
+                onClick={() => delFromWishlist()}
                 className="cursor-pointer text-blue-500 hover:text-blue-600"
                 fontSize="large"
               />
             ) : (
               <BookmarkIcon
-                onClick={() => setIsBookmarked(true)}
+                onClick={() => addToWishlist()}
                 className="cursor-pointer text-gray-600 hover:text-black"
                 fontSize="large"
               />

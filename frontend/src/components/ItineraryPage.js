@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { DatePicker } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers";
+import axios from 'axios'
 
 export default function ItineraryPage() {
   const [showModal, setShowModal] = useState(true);
@@ -13,14 +14,50 @@ export default function ItineraryPage() {
   const [itineraryDays, setItineraryDays] = useState([]);
   const [selectedDay, setSelectedDay] = useState(0);
   const [showFinalPage, setShowFinalPage] = useState(false);
+  const [wishlistedLocations, setWishlistedLocations] = useState([]);
 
-  const wishlistedLocations = [
-    { name: "Eiffel Tower" },
-    { name: "Louvre Museum" },
-    { name: "Notre Dame Cathedral" },
-    { name: "Champs-Élysées" },
-    { name: "Montmartre" },
-  ];
+  const fetchWishlist = async () => {
+    try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get("http://localhost:3001/api/user/get-wishlist", {
+            headers: { "x-access-token": token }
+        });
+
+        const wishlist = res.data.wishlist.map(item => ({
+            name: item.name,
+            placeId: item.placeId
+        }));
+
+        setWishlistedLocations(wishlist);
+    } catch (error) {
+        console.error("Error fetching wishlist:", error);
+    }
+};
+
+const finishItinerary = async () => {
+  setShowModal(false);
+  setShowFinalPage(true);
+  try {
+      const token = localStorage.getItem("token");
+
+      const itineraryData = {
+          itineraryName,
+          location,
+          startDate,
+          endDate,
+          days: itineraryDays,
+      };
+
+      const res = await axios.post("http://localhost:3001/api/user/save-itinerary", itineraryData, {
+          headers: { "x-access-token": token },
+      });
+
+      alert("Itinerary saved successfully!");
+  } catch (error) {
+      console.error("Error saving itinerary:", error);
+      alert("Failed to save itinerary. Please try again.");
+  }
+};
 
   // Handle itinerary creation
   const createItinerary = () => {
@@ -53,11 +90,10 @@ export default function ItineraryPage() {
     setItineraryDays(updatedDays);
   };
 
-  // Finish itinerary and show the final page
-  const finishItinerary = () => {
-    setShowModal(false);
-    setShowFinalPage(true);
-  };
+  useEffect(() => {
+    fetchWishlist();
+  }, []);
+
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
