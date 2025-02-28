@@ -15,12 +15,13 @@ const Header = ({ children }) => {
     // Fetch user data when component mounts
     const fetchUserData = async () => {
       try {
-        const loggedInUser = getUser();
+        const loggedInUser = await getUser();
         if (!loggedInUser) {
           navigate("/login");
           return;
         }
         setUser(loggedInUser);
+        console.log("logged in user: ", loggedInUser);
           
         // If user has a profile picture, set it
         if (loggedInUser.profilePic) {
