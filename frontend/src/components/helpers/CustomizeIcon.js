@@ -70,7 +70,7 @@ const colorMapping = {
 
 const colors = Object.keys(colorMapping);
 
-export default function CustomizeIcon() {
+export default function CustomizeIcon( {onChange} ) {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedIcon, setSelectedIcon] = useState("Home");
   const SelectedIconComponent = iconsMapping[selectedIcon]; // Actual icon component
@@ -127,6 +127,7 @@ export default function CustomizeIcon() {
     if (selectedIcon !== iconName) {
       setSelectedIcon(iconName);
       updateIconSettings(iconName, selectedColor);
+      onChange(iconName, selectedColor);
     }
   };
 
@@ -134,6 +135,7 @@ export default function CustomizeIcon() {
     if (selectedColor !== color) {
       setSelectedColor(color);
       updateIconSettings(selectedIcon, color);
+      onChange(selectedIcon, color);
     }
   };
 
@@ -189,7 +191,7 @@ export default function CustomizeIcon() {
                 className={`w-12 h-12 flex items-center justify-center rounded-lg border-2 ${
                   selectedIcon === iconName ? "border-black" : "border-transparent"
                 } hover:border-black cursor-pointer`}
-                onClick={() => handleIconChange(iconName)}
+                onClick={() => {handleIconChange(iconName)}}
               >
                 {React.createElement(iconsMapping[iconName], { className: "text-gray-600 hover:text-black text-2xl" })}
               </div>

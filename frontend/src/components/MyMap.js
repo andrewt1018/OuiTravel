@@ -104,16 +104,16 @@ function MyMap() {
     });
 
     useEffect(() => {
-         /** Verify user first */
-         const verifyUser = async () => {
-            const user = await getUser();
-            if (!user) {
-                alert("User not logged in!")
-                navigate("/login")
-                return;
-            }
-            setSavedIcons(user.savedIcons);
-            fetchIconSettings();
+        console.log("In use effect");
+        /** Verify user first */
+        const verifyUser = async () => {
+        const user = await getUser();
+        if (!user) {
+            navigate("/login")
+            return;
+        }
+        setSavedIcons(user.savedIcons);
+        fetchIconSettings();
         }
         verifyUser();
         const geoLocationOptions = {
@@ -131,7 +131,7 @@ function MyMap() {
             setCurrLocation(defaultLocation);
             setLocationSupported(false);
         }
-    }, []);
+    }, [iconColor, iconChar]);
 
     function getLocationSuccess(position) {
         const latitude = position.coords.latitude;
@@ -183,6 +183,10 @@ function MyMap() {
             setIconColor(fetchedColor);
             console.log("fetchiconsetting():", fetchedChar, fetchedColor);
         } catch (error) {
+            if (error.response.status === 403) {
+                navigate("/login");
+                return;
+            }
             console.error("Error fetching data:", error);
         }
     };
@@ -205,7 +209,6 @@ function MyMap() {
             setMarker(null);
         } catch (error) {
             if (error.response.status === 403) {
-                alert("User is not logged in!")
                 navigate("/login");
                 return;
             }
@@ -234,7 +237,6 @@ function MyMap() {
           setSelectedIcon('');
         } catch (error) {
           if (error.response.status === 403) {
-              alert("User is not logged in!")
               navigate("/login");
               return;
           }
@@ -265,6 +267,13 @@ function MyMap() {
     const handleCameraChange = useCallback((e) => {
         setMapCenter(e.detail.center);
     });
+
+    const handleIconChange = (icon, color) => {
+        console.log('Icon changed to:', icon);
+        console.log('Color changed to:', color);
+        setIconChar(icon);
+        setIconColor(color);
+    };
 
     const getGeocode = async (address) => {
         const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${GOOGLE_MAPS_API_KEY}`;
@@ -365,7 +374,7 @@ function MyMap() {
 
     return (currLocation && isLoaded) ? (
       <APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
-        <CustomizeIcon />
+        <CustomizeIcon onChange={handleIconChange} />
         <NavigationLayout showHeader={true} headerSearchBar={<SearchBar ref={inputRef}/>} showButton={true} headerSearchButton={<SearchButton />}>
           <div style={{ height: "100vh", width: "100vw" }}>
             <div style={{ height: "75%", width: "75%" }}>
@@ -376,7 +385,6 @@ function MyMap() {
                     onClick={onMapClick}
                     fullscreenControl={false}
                     onCameraChanged={handleCameraChange}
-                    reuseMaps={true}
                     >
                     {/* <SavedMarkers 
                         savedIcons={savedIcons} /> */}

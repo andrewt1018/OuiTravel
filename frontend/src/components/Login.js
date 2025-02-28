@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
+import { getUser } from "./helpers/user-verification";
 import "./styles/general.css"
 
 const Login = () => {
@@ -8,13 +9,15 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userId = localStorage.getItem('userId');
-    if (token && userId) {
-      navigate("/");
-    }
-  });
+  // useEffect(() => {
+  //   const verifyUser = async () => {
+  //     const user = await getUser();
+  //     if (user) {
+  //       navigate("/");
+  //     }
+  //   };
+  //   verifyUser();
+  // });
 
   const handleSubmit = async (e) => {
     e.preventDefault();

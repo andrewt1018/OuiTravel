@@ -2,29 +2,29 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import Avatar from '@mui/material/Avatar';
+import { useNavigate } from 'react-router-dom';
+import { getUser } from './user-verification';
 
 const Header = ({ children }) => {
   const [user, setUser] = useState(null);
   const [profilePic, setProfilePic] = useState(null);
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     // Fetch user data when component mounts
     const fetchUserData = async () => {
       try {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-        
-        const response = await axios.get('http://localhost:3001/api/user/get-user', {
-          headers: { 'x-access-token': token }
-        });
-        
-        if (response.data && response.data.user) {
-          setUser(response.data.user);
+        const loggedInUser = getUser();
+        if (!loggedInUser) {
+          navigate("/login");
+          return;
+        }
+        setUser(loggedInUser);
           
-          // If user has a profile picture, set it
-          if (response.data.user.profilePic) {
-            setProfilePic(`http://localhost:3001/api/upload/images/${response.data.user.profilePic}`);
-          }
+        // If user has a profile picture, set it
+        if (loggedInUser.profilePic) {
+          setProfilePic(`http://localhost:3001/api/upload/images/${loggedInUser.profilePic}`);
         }
       } catch (error) {
         console.error('Error fetching user data:', error);

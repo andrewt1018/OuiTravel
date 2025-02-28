@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import {getUser} from "./user-verification"
 
 const UserSearchDropdown = ({ query, setQuery }) => {
   const navigate = useNavigate(); // Hook for navigation
@@ -11,23 +12,19 @@ const UserSearchDropdown = ({ query, setQuery }) => {
 
   // Fetch the logged-in user's data
   useEffect(() => {
-    const fetchLoggedInUser = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:3001/api/user/get-user",
-          {
-            headers: {
-              "x-access-token": localStorage.getItem("token"), // Get token from local storage
-            },
+      const verifyUser = async () => {
+          try {
+              const user = await getUser();
+              if (!user) {
+                  navigate("/login");
+                  return;
+              }
+              setLoggedInUsername(user.username); // Set the username in state
+          } catch (error) {
+              console.error("Error verifying user:", error);
           }
-        );
-        setLoggedInUsername(response.data.user.username); // Set the username in state
-      } catch (error) {
-        console.error("Error fetching logged-in user:", error);
       }
-    };
-
-    fetchLoggedInUser();
+      verifyUser();
   }, []);
 
   useEffect(() => {
