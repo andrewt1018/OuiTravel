@@ -402,8 +402,9 @@ function MyMap() {
                             key={icon._id}
                             position={icon.position}
                             onClick={() => handleIconClick(icon._id)}
+                            style={{transform:"scale(1.8)"}}
                         >
-                            <span className={`text-4xl ${colorMappingTxt[iconColor]}`}>
+                            <span className={`${colorMappingTxt[iconColor]}`}>
                                 {getMuiIcon(iconChar)}
                             </span>
                         </AdvancedMarker>
