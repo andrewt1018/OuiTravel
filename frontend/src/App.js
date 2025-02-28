@@ -12,9 +12,11 @@ import Profile from './components/Profile.js';
 import MessagePage from './components/MessagePage.js';
 import EditProfile from './components/EditProfile.js';
 import LocationPage from './components/LocationPage.js';
+import Itinerary from './components/ItineraryPage.js';
 import NavigationLayout from './components/helpers/NavigationLayout.js';
 import LocationOverlay from './components/helpers/LocationOverlay.js';
 import IndexSearchBar from './components/helpers/IndexSearchBar';
+import CustomizeIcon from './components/helpers/CustomizeIcon.js';
 import SettingPage from './components/SettingPage.js';
 import UserProfile from "./components/UserProfile.js"; // Adjust the path to where UserProfile.js is located
 import Logout from './components/Logout.js'
@@ -30,6 +32,7 @@ function App() {
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/upload" element={<UploadImage />} />
         <Route path="/location-overlay" element={<LocationOverlay />} />
+        <Route path="/customize-icon" element={<CustomizeIcon />} />
         {/* Routes with navigation */}
         <Route path="/" element={
           <NavigationLayout showHeader={true} headerSearchBar={<IndexSearchBar />}>
@@ -49,6 +52,11 @@ function App() {
         <Route path="/location-page/:placeId" element={
           <NavigationLayout showHeader={false}>
             <LocationPage />
+          </NavigationLayout>
+        } />
+        <Route path="/itinerary" element={
+          <NavigationLayout showHeader={false}>
+            <Itinerary />
           </NavigationLayout>
         } />
          <Route path="/messages" element={
