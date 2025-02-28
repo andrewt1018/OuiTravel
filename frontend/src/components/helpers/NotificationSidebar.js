@@ -9,6 +9,7 @@ import CommentIcon from "@mui/icons-material/Comment";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import TagIcon from "@mui/icons-material/Tag";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import NotificationsIcon from '@mui/icons-material/Notifications';
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { formatTimestamp } from "./messageComponents/formatTimestamp";
@@ -23,14 +24,41 @@ const notificationIcons = {
   "End-of-day Reminder": <EventIcon />,
   "Upcoming Trip": <LocationOnIcon />,
   "Achievement Unlocked": <StarIcon />,
-  Tagged: <TagIcon />,
+  "Tagged": <TagIcon />,
   "Recommended Location": <VisibilityIcon />,
+  "New Follower": <NotificationsIcon />
 };
 
 const NotificationSidebar = ({ isNotificationsVisible, closePanel }) => {
   const [notifications, setNotifications] = useState([]);
   const [handledRequests, setHandledRequests] = useState({});
   const navigate = useNavigate();
+
+
+  // const getNotifications = async () => {
+  //   try {
+  //     const token = localStorage.getItem("token");
+  //     const response = await axios.get(
+  //       `http://localhost:3001/api/noti/getNoti`,
+  //       {
+  //         headers: { "x-access-token": `${token}` },
+  //       }
+  //     );
+  //     setNotifications(response.data.notifications);
+  //   } catch (error) {
+  //     console.error("Error loading notifications: ", error);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   getNotifications(); 
+
+  //   const intervalId = setInterval(() => {
+  //     getNotifications();
+  //   }, 30000); 
+  //   return () => clearInterval(intervalId);
+  // }, []);
+
 
   useEffect(() => {
     const getNotifications = async () => {
