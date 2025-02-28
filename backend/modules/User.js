@@ -23,21 +23,6 @@ const iconSchema = new mongoose.Schema({
   },
 });
 
-const categoryIconSchema = new mongoose.Schema({
-  category: {
-    type: String,
-    default: "Other",
-  },
-  char: {
-    type: String,
-    default: "StarIcon",
-  },
-  color: {
-    type: String,
-    default: "text-yellow-500",
-  }
-});
-
 // Define the User schema
 const userSchema = new mongoose.Schema({
   email: {

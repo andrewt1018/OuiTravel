@@ -12,6 +12,7 @@ const Preferences = require("../modules/Preferences");
 const Image = require("../modules/Image");
 const Location = require("../modules/Location");
 const Itinerary = require("../modules/Itinerary");
+const CategoryIcon = require("../modules/CategoryIcon");
 
 const router = express.Router();
 
@@ -133,6 +134,7 @@ router.post("/remove-icon", verifyToken, async (req, res) => {
   }
 });
 
+/* Should probably move out of user routes later */
 router.post("/update-category-icon", verifyToken, async (req, res) => {
   const { category = "Other", char, color } = req.body;
 

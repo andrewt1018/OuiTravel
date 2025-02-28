@@ -171,17 +171,22 @@ function MyMap() {
     const fetchIconSettings = async () => {
         try {
             const token = localStorage.getItem("token");
-
+    
             const categoryRes = await axios.get("http://localhost:3001/api/user/get-category-icon", {
-                headers: { 'x-access-token': `${token}` }
+                headers: { 'x-access-token': token }
             });
 
-            setIconChar(categoryRes.data.char || "Star");
-            setIconColor(categoryRes.data.color || "gray");
+            const fetchedChar = categoryRes.data.char || "Star";
+            const fetchedColor = categoryRes.data.color || "gray";
+    
+            setIconChar(fetchedChar);
+            setIconColor(fetchedColor);
+            console.log("fetchiconsetting():", fetchedChar, fetchedColor);
         } catch (error) {
             console.error("Error fetching data:", error);
         }
     };
+    
 
     const addIcon = async () => {
         /* Sanity checks */
@@ -248,9 +253,11 @@ function MyMap() {
       setSelectedIcon(id);
     }
 
-    const getMuiIcon = (iconName) => {
-        return iconMap[iconName] || <Star />;
+    const getMuiIcon = (char) => {
+        console.log("selected mui icon is", iconMap[char]);
+        return iconMap[char] || <Star />;
     }
+
     const getColorClass = (colorName) => {
         return colorMappingTxt[colorName] || "text-pink-500";
       };
@@ -388,8 +395,8 @@ function MyMap() {
                             position={icon.position}
                             onClick={() => handleIconClick(icon._id)}
                         >
-                            <span className={`text-4xl ${colorMappingTxt[icon.color] || "text-gray-500"}`}>
-                                {getMuiIcon(icon.char)}
+                            <span className={`text-4xl ${colorMappingTxt[iconColor]}`}>
+                                {getMuiIcon(iconChar)}
                             </span>
                         </AdvancedMarker>
                     ))}
