@@ -54,38 +54,38 @@ export default function LocationPage() {
         console.error("Error adding to wishlist:", error);
         alert(error.response?.data?.message || "Could not add to wishlist.");
     }
-};
+  };
 
-const delFromWishlist = async () => {
-  setIsBookmarked(false);
-  try {
-      const token = localStorage.getItem("token");
-      const res = await axios.delete(`http://localhost:3001/api/user/del-wishlist/${placeId}`, 
-          { headers: { "x-access-token": token } }
-      );
+  const delFromWishlist = async () => {
+    setIsBookmarked(false);
+    try {
+        const token = localStorage.getItem("token");
+        const res = await axios.delete(`http://localhost:3001/api/user/del-wishlist/${placeId}`, 
+            { headers: { "x-access-token": token } }
+        );
 
-      alert(res.data.message);
-  } catch (error) {
-      console.error("Error removing from wishlist:", error);
-      alert(error.response?.data?.message || "Could not remove from wishlist.");
-  }
-};
+        alert(res.data.message);
+    } catch (error) {
+        console.error("Error removing from wishlist:", error);
+        alert(error.response?.data?.message || "Could not remove from wishlist.");
+    }
+  };
 
-const fetchWishlistAndCheck = async () => {
-  try {
-      const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:3001/api/user/get-wishlist", 
-          { headers: { "x-access-token": token } }
-      );
+  const fetchWishlistAndCheck = async () => {
+    try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get("http://localhost:3001/api/user/get-wishlist", 
+            { headers: { "x-access-token": token } }
+        );
 
-      setWishlist(res.data.wishlist);
+        setWishlist(res.data.wishlist);
 
-      const isWishlisted = res.data.wishlist.some(item => item.placeId === placeId);
-      setIsBookmarked(isWishlisted);
-  } catch (error) {
-      console.error("Error fetching wishlist:", error);
-  }
-};
+        const isWishlisted = res.data.wishlist.some(item => item.placeId === placeId);
+        setIsBookmarked(isWishlisted);
+    } catch (error) {
+        console.error("Error fetching wishlist:", error);
+    }
+  };
 
   // Fetch the location data using the placeId
   useEffect(() => {

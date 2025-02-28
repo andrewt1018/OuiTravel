@@ -8,6 +8,7 @@ import HomeIcon from '@mui/icons-material/Home';
 import MapIcon from '@mui/icons-material/Map';
 import PersonIcon from '@mui/icons-material/Person';
 import TravelExploreIcon from '@mui/icons-material/TravelExplore';
+import ListAltIcon from '@mui/icons-material/ListAlt';
 import ForumIcon from '@mui/icons-material/Forum';
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline';
 import NotificationsIcon from '@mui/icons-material/Notifications';
@@ -42,6 +43,7 @@ const toggleNotifications = () => {
     { path: '/', label: 'Home', icon: <HomeIcon /> },
     { path: '/my-map', label: 'My Map', icon: <MapIcon /> },
     { path: '', label: 'Explore', icon: <TravelExploreIcon /> },
+    { path: '/itinerary', label: 'Itineraries', icon: <ListAltIcon /> },
     { path: '', label: 'Journals', icon: <DriveFileRenameOutlineIcon /> },
     { path: '/messages', label: 'Messages', icon: <ForumIcon /> },
     { path: '', label: 'Notifications', icon: <NotificationsIcon />, onClick: toggleNotifications },
