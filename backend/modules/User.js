@@ -17,8 +17,9 @@ const iconSchema = new mongoose.Schema({
     type: positionSchema,
     required: true,
   },
-  char: {
+  category: {
     type: String,
+    default: "Other",
   },
 });
 

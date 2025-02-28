@@ -10,6 +10,9 @@ const User = require("../modules/User");
 const Notification = require("../modules/Notification");
 const Preferences = require("../modules/Preferences");
 const Image = require("../modules/Image");
+const Location = require("../modules/Location");
+const Itinerary = require("../modules/Itinerary");
+const CategoryIcon = require("../modules/CategoryIcon");
 
 const router = express.Router();
 
@@ -65,7 +68,7 @@ router.post("/save-icon", verifyToken, async (req, res) => {
         lat: marker.position.lat,
         lng: marker.position.lng,
       },
-      char: "⭐️",
+      category: "Other",
       _id: new ObjectId(),
     };
     await dbConnect.collection("users").updateOne(
@@ -82,6 +85,29 @@ router.post("/save-icon", verifyToken, async (req, res) => {
     return res.status(500).json({ message: "Cannot save icon." });
   }
 });
+
+// currently hardcoded, will need to fix for location categories later
+router.get("/get-category-icon", verifyToken, async (req, res) => {
+  const category = "Other";
+
+  try {
+    const categoryIcon = await CategoryIcon.findOne({ category });
+
+    if (!categoryIcon) {
+      return res.status(404).json({ message: "Category not found." });
+    }
+
+    return res.status(200).json({
+      category: categoryIcon.category,
+      char: categoryIcon.char,
+      color: categoryIcon.color,
+    });
+  } catch (error) {
+    console.error("Error fetching category icon:", error);
+    return res.status(500).json({ message: "Cannot fetch category icon." });
+  }
+});
+
 
 router.post("/remove-icon", verifyToken, async (req, res) => {
   const userId = req.user.id;
@@ -106,6 +132,142 @@ router.post("/remove-icon", verifyToken, async (req, res) => {
     console.log(error);
     return res.status(500).json({ message: "Cannot save icon." });
   }
+});
+
+/* Should probably move out of user routes later */
+router.post("/update-category-icon", verifyToken, async (req, res) => {
+  const { category = "Other", char, color } = req.body;
+
+  try {
+    await CategoryIcon.findOneAndUpdate(
+      { category },
+      { char, color }
+    );
+
+    return res.status(200).json({ message: "Category icon updated successfully." });
+  } catch (error) {
+    console.error("Error updating category icon:", error);
+    return res.status(500).json({ message: "Cannot update category icon." });
+  }
+});
+
+/* Add a location to the user's wishlist */
+router.post("/post-wishlist", verifyToken, async (req, res) => {
+  const userId = req.user.id;
+  const { placeId } = req.body;
+  console.log("Received placeId:", placeId);
+
+  try {
+      const location = await Location.findOne({ placeId: placeId });
+      if (!location) {
+          return res.status(404).json({ message: "Location not found." });
+      }
+
+      const user = await User.findById(userId);
+      if (!user) {
+          return res.status(404).json({ message: "User not found." });
+      }
+
+      if (user.wishlist.includes(location._id)) {
+          return res.status(400).json({ message: "Location already wishlisted." });
+      }
+
+      user.wishlist.push(location._id);
+      await user.save();
+
+      return res.status(200).json({ message: "Location added to wishlist!", wishlist: user.wishlist });
+  } catch (error) {
+      console.error("Error adding to wishlist:", error);
+      return res.status(500).json({ message: "Internal server error." });
+  }
+});
+
+/* Remove location from wishlist */
+router.delete("/del-wishlist/:placeId", verifyToken, async (req, res) => {
+  const userId = req.user.id;
+  const { placeId } = req.params;
+
+  try {
+      const location = await Location.findOne({ placeId: placeId });
+      if (!location) {
+          return res.status(404).json({ message: "Location not found." });
+      }
+
+      const user = await User.findById(userId);
+      if (!user) {
+          return res.status(404).json({ message: "User not found." });
+      }
+
+      if (!user.wishlist.includes(location._id)) {
+          return res.status(400).json({ message: "Location is not in wishlist." });
+      }
+
+      user.wishlist = user.wishlist.filter(id => id.toString() !== location._id.toString());
+      await user.save();
+
+      return res.status(200).json({ message: "Location removed from wishlist!", wishlist: user.wishlist });
+  } catch (error) {
+      console.error("Error removing from wishlist:", error);
+      return res.status(500).json({ message: "Internal server error." });
+  }
+});
+
+/* Get wishlist */
+router.get("/get-wishlist", verifyToken, async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+      const user = await User.findById(userId).populate("wishlist");
+      if (!user) {
+          return res.status(404).json({ message: "User not found." });
+      }
+
+      return res.status(200).json({ wishlist: user.wishlist });
+  } catch (error) {
+      console.error("Error fetching wishlist:", error);
+      return res.status(500).json({ message: "Internal server error." });
+  }
+});
+
+/* Save an itinerary and associate it with the user */
+router.post("/save-itinerary", verifyToken, async (req, res) => {
+    const userId = req.user.id;
+    const { itineraryName, location, startDate, endDate, days } = req.body;
+
+    try {
+        const processedDays = await Promise.all(days.map(async (day) => {
+            const activityIds = await Promise.all(day.activities.map(async (activity) => {
+                const location = await Location.findOne({ name: activity }) || await Location.findOne({ placeId: activity });
+
+                return location._id;
+            }));
+
+            return { date: day.date, activities: activityIds };
+        }));
+
+        const newItinerary = new Itinerary({
+            itineraryName,
+            location,
+            startDate,
+            endDate,
+            days: processedDays,
+        });
+
+        await newItinerary.save();
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        user.itineraries.push(newItinerary._id);
+        await user.save();
+
+        return res.status(201).json({ message: "Itinerary saved successfully!", itinerary: newItinerary });
+    } catch (error) {
+        console.error("Error saving itinerary:", error);
+        return res.status(500).json({ message: "Internal server error." });
+    }
 });
 
 /* Get user data */
