@@ -13,7 +13,7 @@ const Login = () => {
     // Add your login logic here
     try {
       const res = await axios.post('http://localhost:3001/api/auth/login', { username, password });
-      console.log(res.data);
+      console.log(res.data.JSON)
       if (res.data.token) {
         localStorage.setItem('token', res.data.token);
         localStorage.setItem('userId', res.data.userId);
