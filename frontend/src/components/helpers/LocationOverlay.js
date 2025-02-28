@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
@@ -6,16 +6,70 @@ import BookmarkIcon from "@mui/icons-material/Bookmark";
 import BookmarkAddedIcon from "@mui/icons-material/BookmarkAdded";
 import { CardContent, CardHeader } from "@mui/material";
 import { ExpandMore, ExpandLess } from "@mui/icons-material";
+import axios from 'axios'
 
 export default function LocationOverlay({ placeId, placeName, placeLocation }) {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [wishlist, setWishlist] = useState([]);
 
   // Hardcoded scores
   const friendScore = 8.5;
   const communityScore = 9.2;
   const yourScore = 7.8;
+
+  const addToWishlist = async () => {
+    setIsBookmarked(true)
+    try {
+        const token = localStorage.getItem("token");
+        const res = await axios.post("http://localhost:3001/api/user/post-wishlist", 
+            { placeId },
+            { headers: { "x-access-token": token } }
+        );
+
+        alert(res.data.message);
+    } catch (error) {
+        console.error("Error adding to wishlist:", error);
+        alert(error.response?.data?.message || "Could not add to wishlist.");
+    }
+  };
+
+  const delFromWishlist = async () => {
+    setIsBookmarked(false);
+    try {
+        const token = localStorage.getItem("token");
+        const res = await axios.delete(`http://localhost:3001/api/user/del-wishlist/${placeId}`, 
+            { headers: { "x-access-token": token } }
+        );
+
+        alert(res.data.message);
+    } catch (error) {
+        console.error("Error removing from wishlist:", error);
+        alert(error.response?.data?.message || "Could not remove from wishlist.");
+    }
+  };
+
+  const fetchWishlistAndCheck = async () => {
+    try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get("http://localhost:3001/api/user/get-wishlist", 
+            { headers: { "x-access-token": token } }
+        );
+
+        setWishlist(res.data.wishlist);
+
+        const isWishlisted = res.data.wishlist.some(item => item.placeId === placeId);
+        setIsBookmarked(isWishlisted);
+    } catch (error) {
+        console.error("Error fetching wishlist:", error);
+    }
+  };
+
+  // Fetch the bookmarked status using the placeId
+  useEffect(() => {
+      fetchWishlistAndCheck();
+  }, [placeId]);
 
   return (
     <div className="absolute bottom-4 right-4 w-96 bg-white shadow-lg rounded-2xl overflow-hidden">
@@ -46,13 +100,13 @@ export default function LocationOverlay({ placeId, placeName, placeLocation }) {
               )}
               {isBookmarked ? (
                 <BookmarkAddedIcon
-                  className="cursor-pointer text-blue-300 hover:text-blue-400"
-                  onClick={() => setIsBookmarked(false)}
+                  onClick={() => delFromWishlist()}
+                  className="cursor-pointer text-blue-500 hover:text-blue-600"
                 />
               ) : (
                 <BookmarkIcon
+                  onClick={() => addToWishlist()}
                   className="cursor-pointer text-gray-600 hover:text-black"
-                  onClick={() => setIsBookmarked(true)}
                 />
               )}
             </div>
