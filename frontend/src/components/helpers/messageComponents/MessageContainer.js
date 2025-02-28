@@ -97,7 +97,7 @@ const MessageContainer = ({ userId, selectedUser }) => {
                 <img
                 src={selectedUser.profilePic || "/default-avatar.png"}
                 alt={selectedUser.username}
-                className="w-10 h-10 rounded-full mr-3"
+                className="w-10 h-10 object-cover rounded-full mr-3"
                 />
                 <h2 className="text-lg font-semibold">{selectedUser.username}</h2>
             </div>
@@ -123,7 +123,7 @@ const MessageContainer = ({ userId, selectedUser }) => {
                     <div className="mr-2">
                         <img
                         src={selectedUser.profilePic || "/default-avatar.png"} 
-                        className="w-10 h-10 rounded-full"
+                        className="w-10 h-10 object-cover rounded-full"
                         alt={selectedUser.username}
                         />
                     </div>
