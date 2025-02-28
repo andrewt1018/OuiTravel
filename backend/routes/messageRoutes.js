@@ -2,6 +2,7 @@ const express = require('express');
 const User = require('../modules/User');
 const Message = require('../modules/Message');
 const Notification = require('../modules/Notification');
+const Image = require('../modules/Image');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 
@@ -74,7 +75,6 @@ router.post('/sendMessage', verifyToken, async (req, res) => {
         });
     
         await newMessage.save();
-        console.log("new message: ", newMessage);
 
         // Socket
         // const receiverSocketId = getReceiverSocketId(receiverId);
@@ -93,7 +93,6 @@ router.post('/sendMessage', verifyToken, async (req, res) => {
         });
 
         await newMessNoti.save();
-        console.log("new noti", newMessNoti);
 
         const receiver = await User.findById(receiverId);
         receiver.notifications.push(newMessNoti); // Push the new notification
@@ -185,10 +184,24 @@ router.get('/getUsersForSideBar', verifyToken, async (req, res) => {
             let otherUser = await User.findById(otherUserId).select("username profilePic");
             
             if (otherUser) {
+                let otherUserPic;
+                if (otherUser.profilePic) {
+                    const images = await Image.find(otherUser.profilePic);
+                    if (images && images.length !== 0) {
+                        const processedImages =  images.map(image => ({
+                            id: image._id,
+                            name: image.name,
+                            imageUrl: `data:${image.img.contentType};base64,${image.img.data.toString('base64')}`
+                        }));
+    
+                        otherUserPic = processedImages[0];
+                    }
+                }
+    
                 users.push({
                     userId: otherUser._id,
                     username: otherUser.username,
-                    profilePic: otherUser.profilePic,
+                    profilePic: otherUser.profilePic ? (otherUserPic.imageUrl) : otherUserPic,
                     lastMessage: msg.lastMessage,
                     lastMessageTime: msg.lastMessageTime,
                     unread: msg.unread && msg.receiverId.toString() === userId 
@@ -233,10 +246,8 @@ router.post('/markMessageAsRead', verifyToken, async (req, res) => {
 
 router.get("/getMessUser/:userId", verifyToken, async (req, res) => {
 
-    console.log("req params", req.params);
     try {
         const { userId } = req.params;
-        console.log("userId: ", userId);
 
         const user = await User.findById(userId).select("username profilePic"); 
         if (!user) {

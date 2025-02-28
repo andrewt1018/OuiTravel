@@ -28,6 +28,7 @@ export default function UserProfile() {
 
   const handleFollow = async () => {
     try {
+      console.log("isFollowing is ", isFollowing);
       if (isFollowing) {
         await axios.post(
           `http://localhost:3001/api/user/unfollow/${userData._id}`,
@@ -107,10 +108,13 @@ export default function UserProfile() {
         setIsFollowing(isUserFollowing); //set the text of button when revisit the profile
         if (isUserFollowing) {
           setFollowText("Following");
+          //setIsPrivate(false);
         } else if (isRequested) {
           setFollowText("Follow Requested");
+          //setIsPrivate(true);
         } else {
           setFollowText("Follow");
+          //setIsPrivate(true);
         }
       } catch (error) {
         console.error("Error fetching user profile:", error);
@@ -152,6 +156,7 @@ export default function UserProfile() {
                   : "border-gray-400 hover:bg-gray-100"
               }`}
               onClick={handleFollow}
+              disabled={followText === "Follow Requested"}
             >
               {/* {isFollowing ? "Following" : "Follow"} */}
               {followText}
@@ -161,7 +166,7 @@ export default function UserProfile() {
       </div>
 
       {/* Main Content */}
-      {isPrivate ? (
+      {isPrivate && !isFollowing ? (
         <div className="flex flex-1 p-8 justify-center items-center">
           <Typography variant="h5" color="textSecondary">
             This profile has Private Content.

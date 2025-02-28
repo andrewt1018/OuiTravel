@@ -132,7 +132,7 @@ const MessageSidebar = ({ userId, selectedUser, setSelectedUser }) => {
             onClick={() => handleUserSelect(user)}
           >
             <img
-              src={user.profilePic || "/selena.jpg"}
+              src={user.profilePic || "/default-avatar.png"}
               alt={user.username}
               className="w-12 h-12 rounded-full object-cover"
             />

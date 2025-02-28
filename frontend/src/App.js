@@ -19,6 +19,7 @@ import IndexSearchBar from './components/helpers/IndexSearchBar';
 import CustomizeIcon from './components/helpers/CustomizeIcon.js';
 import SettingPage from './components/SettingPage.js';
 import UserProfile from "./components/UserProfile.js"; // Adjust the path to where UserProfile.js is located
+import Logout from './components/Logout.js'
 
 function App() {
   return (
@@ -84,6 +85,7 @@ function App() {
             </NavigationLayout>
           }
         />
+        <Route path="/logout" element={<Logout />} />
       </Routes>
     </Router>
   );

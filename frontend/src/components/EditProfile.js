@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { getUser } from './helpers/user-verification';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 const EditProfile = () => {
     const [newFirstName, setNewFirstName] = useState('');
@@ -184,11 +185,24 @@ const EditProfile = () => {
             {/* Profile Section */}
             <p className="py-2 text-xl font-semibold">Profile Picture</p>
             <div className="flex items-center gap-6 mb-8">
-                <img
-                    className="h-16 w-16 object-cover rounded-full"
-                    src={profilePicPreview || "/selena.jpg"}
+                { profilePicPreview ? 
+                    (<img
+                        className="h-16 w-16 object-cover rounded-full"
+                        src={profilePicPreview}
+                        alt="Profile Avatar"
+                    />)
+                : (<img
+                    className="h-16 w-16 object-contain rounded-full"
+                    src={"/default-avatar.png"}
                     alt="Profile Avatar"
-                />
+                />)
+}
+                {/* <img
+                    className="h-16 w-16 object-cover rounded-full"
+                    src={profilePicPreview || "/default-avatar.png"}
+                    alt="Profile Avatar"
+                /> */}
+
                 <div className="flex flex-col items-start">
                     <span className='text-xl font-semibold text-gray-800'>{newUsername}</span>
                     <label className="inline-flex text-sm font-semibold text-blue-600 underline decoration-2 cursor-pointer">

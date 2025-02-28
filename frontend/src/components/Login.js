@@ -48,42 +48,47 @@ const Login = () => {
   };
 
   return (
-    <div className="main">
-      <p className="title">Login</p>
-      <div className="wrapper">
-        <form onSubmit={handleSubmit}>
-          <div className="usernameInput">
-            <input
-              className="inputs"
-              type="text"
-              placeholder={'Username'}
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-          </div>
-          <div className="passwordInput">
-            <input
-              className="inputs"
-              type="password"
-              placeholder={'Password'}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-
-          <button>
-            {'Login'}
-          </button>
-          <p>
-            {"Don't have an account?"} <Link to="/create-account">{'Create one here'}</Link>.
-          </p>
-          <p>
-            {'Forgot your password?'} <Link to="/reset-password">{'Reset your password'}</Link>.
-          </p>
-        </form>
-      </div>  
-    </div>
-  );
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
+        <div className="w-full max-w-md bg-white shadow-lg rounded-2xl p-6">
+          <h1 className="text-3xl font-semibold text-center text-gray-800">Welcome to OuiTravel!</h1>
+          <h2 className="text-xl font-medium text-center text-gray-600 mt-4">Login</h2>
+          <form onSubmit={handleSubmit} className="space-y-4 mt-6">
+            <div>
+              <input
+                type="text"
+                className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <input
+                type="password"
+                className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-300"
+            >
+              Login
+            </button>
+            <p className="text-center text-gray-700">
+              Don't have an account? <Link className="underline text-blue-600 hover:text-blue-800" to="/create-account">Create one here</Link>.
+            </p>
+            <p className="text-center text-gray-700">
+              Forgot your password? <Link className="underline text-blue-600 hover:text-blue-800" to="/reset-password">Reset your password</Link>.
+            </p>
+          </form>
+        </div>
+      </div>
+    );
 };
 
 export default Login;

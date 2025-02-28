@@ -37,62 +37,67 @@ function CreateAccount() {
       };
 
     return (
-        <div className="main">
-            <p className="title">Create Account</p>
-            <div className="wrapper">
-                <form onSubmit={handleSubmit}>
-                    <div className="usernameBox">
-                        <p>
-                            Please enter your username:
-                        </p>
-                        <input
-                            className="inputs"
-                            type="text"
-                            placeholder="bob123"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                        />                                
-                    </div>
-                    <div className="emailBox">
-                        <p>
-                            Please enter your email:
-                        </p>
-                        <input
-                            className="inputs"
-                            type="text"
-                            placeholder="bob@xyz.com"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                        />                    
-                    </div>
-                    <div className="passwordBox">
-                        <p>
-                            Please enter your password:
-                        </p>
-                        <input
-                            className="inputs"
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                        />                    
-                    </div>
-                    <div className="reenterPasswordBox">
-                        <p>
-                            Please reenter your password:
-                        </p>
-                        <input
-                            className="inputs"
-                            type="password"
-                            value={reenterPass}
-                            onChange={(e) => setReenterPass(e.target.value)}
-                        />      
-                    </div>       
-                    <button style={{"marginTop": "30px"}}>
-                        Create account
-                    </button>   
-                </form>    
-            </div>
-        </div>
-    )
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
+      <div className="w-full max-w-md bg-white shadow-lg rounded-2xl p-6">
+        <h2 className="text-2xl font-semibold text-center text-gray-800 mb-4">
+          Create Account
+        </h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-gray-700 font-medium">Username</label>
+            <input
+              className="w-full mt-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              type="text"
+              placeholder="bob123"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-gray-700 font-medium">Email</label>
+            <input
+              className="w-full mt-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              type="email"
+              placeholder="bob@xyz.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-gray-700 font-medium">Password</label>
+            <input
+              className="w-full mt-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-gray-700 font-medium">Re-enter Password</label>
+            <input
+              className="w-full mt-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              type="password"
+              value={reenterPass}
+              onChange={(e) => setReenterPass(e.target.value)}
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full mt-4 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-300"
+          >
+            Create Account
+          </button>
+        </form>
+      </div>
+    </div>
+  );
 }
 export default CreateAccount;

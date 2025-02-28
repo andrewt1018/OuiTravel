@@ -18,7 +18,9 @@ const IndexSearchBar = () => {
         />
       </div>
 
-      <UserSearchDropdown query={query} setQuery={setQuery} />
+      <div className="absolute w-full mt-1">
+        <UserSearchDropdown query={query} setQuery={setQuery} />
+      </div>
     </div>
   );
 };

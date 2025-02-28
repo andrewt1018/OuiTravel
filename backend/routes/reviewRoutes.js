@@ -80,19 +80,41 @@ router.get('/user-review/:placeId', verifyToken, async (req, res) => {
         const review = await Review.findOne({ 
             location: location._id,
             user: userId 
-        }).populate('photos');
+        });
         
         console.log('Review found:', review ? 'Yes' : 'No');
 
-        // Return empty response instead of 404 if no review exists
-        if (!review) {
-            return res.status(200).json({ 
-                message: 'No review found for this user and location',
-                review: null
-            });
+        // If review exists, ensure it's properly formatted for the client
+        if (review) {
+            try {
+                // Create a plain object from the Mongoose document
+                const reviewObj = review.toObject();
+                
+                // Ensure photos is an array of strings (not ObjectIds)
+                if (Array.isArray(reviewObj.photos)) {
+                    reviewObj.photos = reviewObj.photos.map(photo => {
+                        // Handle if photo is already a string
+                        if (typeof photo === 'string') return photo;
+                        
+                        // Handle if photo is an ObjectId
+                        if (photo && photo.toString) return photo.toString();
+                        
+                        // Handle null/undefined case
+                        return null;
+                    }).filter(Boolean); // Remove any null values
+                } else {
+                    reviewObj.photos = [];
+                }
+                
+                console.log('Processed photos:', reviewObj.photos);
+                res.json({ review: reviewObj });
+            } catch (err) {
+                console.error('Error processing review object:', err);
+                res.status(500).json({ message: 'Error processing review data' });
+            }
+        } else {
+            res.json({ review: null });
         }
-
-        res.status(200).json({ review });
     } catch (error) {
         console.error('Error fetching user review:', error);
         res.status(500).json({ message: error.message });
@@ -125,6 +147,95 @@ router.get('/user/:userId', verifyToken, async (req, res) => {
     }
 });
 
+// Get reviews from users that current user follows - with enhanced photo handling
+router.get('/feed', verifyToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        
+        // Find current user to get followingList
+        const currentUser = await User.findById(userId);
+        
+        if (!currentUser) {
+            console.log('User not found');
+            return res.status(404).json({ message: 'User not found' });
+        }
+        
+        // Initialize followingList as empty array if it doesn't exist
+        const followingList = currentUser.followingList || [];
+        console.log(`User is following ${followingList.length} accounts`);
+        
+        if (followingList.length === 0) {
+            return res.status(200).json({ reviews: [], message: 'Not following anyone yet' });
+        }
+        
+        // Get reviews from users in followingList, sorted by most recent
+        const reviews = await Review.find({ 
+            user: { $in: followingList } 
+        })
+        .populate('user', 'username firstName lastName profilePic')
+        .populate({
+            path: 'location',
+            select: 'name address placeId category'
+        })
+        .sort({ updatedAt: -1 })
+        .limit(20); // Limit to 20 most recent reviews
+        
+        console.log(`Found ${reviews.length} reviews for feed`);
+        
+        // Process reviews with better photo handling
+        const processedReviews = reviews.map(review => {
+            // Convert to plain object
+            const reviewObj = review.toObject();
+            
+            console.log(`Processing review ${reviewObj._id}`);
+            
+            // Verify the photo IDs are actually objects in the database
+            if (Array.isArray(reviewObj.photos)) {
+                // Make sure each photo ID is a valid string
+                reviewObj.photos = reviewObj.photos
+                    .filter(photo => photo) // Remove null/undefined
+                    .map(photo => {
+                        try {
+                            // If already a string, return it
+                            if (typeof photo === 'string') {
+                                return photo;
+                            }
+                            
+                            // If it's an object with _id, use that
+                            if (typeof photo === 'object' && photo._id) {
+                                return photo._id.toString();
+                            }
+                            
+                            // If it's a Mongoose ObjectId, convert to string
+                            if (photo.toString && typeof photo.toString === 'function') {
+                                return photo.toString();
+                            }
+                            
+                            // If nothing works, skip this photo
+                            console.log('Unhandled photo type:', typeof photo);
+                            return null;
+                        } catch (err) {
+                            console.error('Error processing photo:', err);
+                            return null;
+                        }
+                    })
+                    .filter(Boolean); // Remove any null values after processing
+                
+                console.log(`Review ${reviewObj._id} processed photos:`, reviewObj.photos);
+            } else {
+                reviewObj.photos = [];
+            }
+            
+            return reviewObj;
+        });
+        
+        res.status(200).json({ reviews: processedReviews });
+    } catch (error) {
+        console.error('Error fetching feed:', error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // Create a new review using place ID
 router.post('/create', verifyToken, async (req, res) => {
     try {
@@ -135,6 +246,11 @@ router.post('/create', verifyToken, async (req, res) => {
         if (!placeId || !rating) {
             return res.status(400).json({ message: 'Place ID and rating are required' });
         }
+
+        // Ensure photos is an array of strings
+        const photoIds = Array.isArray(photos) 
+            ? photos.map(photo => typeof photo === 'string' ? photo : photo.toString())
+            : [];
 
         // Find the location by placeId
         const location = await Location.findOne({ placeId });
@@ -155,7 +271,7 @@ router.post('/create', verifyToken, async (req, res) => {
             rating,
             publicComment,
             privateNotes,
-            photos: photos || []
+            photos: photoIds
         });
 
         await newReview.save();
@@ -175,7 +291,10 @@ router.post('/create', verifyToken, async (req, res) => {
 
         res.status(201).json({ 
             message: 'Review created successfully',
-            review: newReview
+            review: {
+                ...newReview.toObject(),
+                photos: newReview.photos.map(photo => photo.toString())
+            }
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -188,6 +307,11 @@ router.put('/update/:reviewId', verifyToken, async (req, res) => {
         const { reviewId } = req.params;
         const userId = req.user.id;
         const { rating, publicComment, privateNotes, photos } = req.body;
+
+        // Ensure photos is an array of strings
+        const photoIds = Array.isArray(photos) 
+            ? photos.map(photo => typeof photo === 'string' ? photo : photo.toString())
+            : [];
 
         // Find the review and check ownership
         const review = await Review.findById(reviewId);
@@ -203,7 +327,7 @@ router.put('/update/:reviewId', verifyToken, async (req, res) => {
         review.rating = rating || review.rating;
         review.publicComment = publicComment !== undefined ? publicComment : review.publicComment;
         review.privateNotes = privateNotes !== undefined ? privateNotes : review.privateNotes;
-        review.photos = photos || review.photos;
+        review.photos = photoIds;
         review.updatedAt = Date.now();
 
         await review.save();
@@ -213,7 +337,10 @@ router.put('/update/:reviewId', verifyToken, async (req, res) => {
 
         res.status(200).json({ 
             message: 'Review updated successfully',
-            review
+            review: {
+                ...review.toObject(),
+                photos: review.photos.map(photo => photo.toString())
+            }
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
