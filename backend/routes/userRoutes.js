@@ -65,7 +65,7 @@ router.post("/save-icon", verifyToken, async (req, res) => {
         lat: marker.position.lat,
         lng: marker.position.lng,
       },
-      char: "⭐️",
+      category: "Other",
       _id: new ObjectId(),
     };
     await dbConnect.collection("users").updateOne(
@@ -82,6 +82,29 @@ router.post("/save-icon", verifyToken, async (req, res) => {
     return res.status(500).json({ message: "Cannot save icon." });
   }
 });
+
+// currently hardcoded, will need to fix for location categories later
+router.get("/get-category-icon", verifyToken, async (req, res) => {
+  const category = "Other";
+
+  try {
+    const categoryIcon = await CategoryIcon.findOne({ category });
+
+    if (!categoryIcon) {
+      return res.status(404).json({ message: "Category not found." });
+    }
+
+    return res.status(200).json({
+      category: categoryIcon.category,
+      char: categoryIcon.char,
+      color: categoryIcon.color,
+    });
+  } catch (error) {
+    console.error("Error fetching category icon:", error);
+    return res.status(500).json({ message: "Cannot fetch category icon." });
+  }
+});
+
 
 router.post("/remove-icon", verifyToken, async (req, res) => {
   const userId = req.user.id;
@@ -107,6 +130,70 @@ router.post("/remove-icon", verifyToken, async (req, res) => {
     return res.status(500).json({ message: "Cannot save icon." });
   }
 });
+
+router.post("/update-category-icon", verifyToken, async (req, res) => {
+  const { category = "Other", char, color } = req.body;
+
+  try {
+    await CategoryIcon.findOneAndUpdate(
+      { category },
+      { char, color }
+    );
+
+    return res.status(200).json({ message: "Category icon updated successfully." });
+  } catch (error) {
+    console.error("Error updating category icon:", error);
+    return res.status(500).json({ message: "Cannot update category icon." });
+  }
+});
+
+/* Add a location to the user's wishlist */
+router.post("/post-wishlist", verifyToken, async (req, res) => {
+  const userId = req.user.id;
+  const { locationId } = req.body;
+
+  try {
+      const location = await Location.findById(locationId);
+      if (!location) {
+          return res.status(404).json({ message: "Location not found." });
+      }
+
+      const user = await User.findById(userId);
+      if (!user) {
+          return res.status(404).json({ message: "User not found." });
+      }
+
+      if (user.wishlist.includes(locationId)) {
+          return res.status(400).json({ message: "Location already wishlisted." });
+      }
+
+      user.wishlist.push(locationId);
+      await user.save();
+
+      return res.status(200).json({ message: "Location added to wishlist!", wishlist: user.wishlist });
+  } catch (error) {
+      console.error("Error adding to wishlist:", error);
+      return res.status(500).json({ message: "Internal server error." });
+  }
+});
+
+/* Get wishlist */
+router.get("/get-wishlist", verifyToken, async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+      const user = await User.findById(userId).populate("wishlist");
+      if (!user) {
+          return res.status(404).json({ message: "User not found." });
+      }
+
+      return res.status(200).json({ wishlist: user.wishlist });
+  } catch (error) {
+      console.error("Error fetching wishlist:", error);
+      return res.status(500).json({ message: "Internal server error." });
+  }
+});
+
 
 /* Get user data */
 /* Used to verify the current user's JWT token (to ensure they're logged in) */

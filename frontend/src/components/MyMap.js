@@ -6,6 +6,7 @@ import axios from "axios"
 
 import {getUser} from "./helpers/user-verification"
 import NavigationLayout from '../components/helpers/NavigationLayout.js';
+import CustomizeIcon from '../components/helpers/CustomizeIcon.js';
 import SearchBar from './helpers/MyMapSearchBar.js'
 
 import {
@@ -20,6 +21,56 @@ import {
     InfoWindow,
 } from "@vis.gl/react-google-maps";
 import LocationOverlay from './helpers/LocationOverlay';
+import { 
+  Home, Star, Favorite, Flight,  Lightbulb, Mood, AssistantPhoto, Attractions, BakeryDining,
+  BeachAccess, Business, Cake, Dining, DinnerDining, LocalDining, DirectionsBus, DirectionsCar,
+  DirectionsWalk, EvStation, LocalBar, LocalGroceryStore, LocalHospital, LocalMall, LocalMovies
+} from "@mui/icons-material";
+
+const iconMap = {
+    "Home": <Home />,
+    "Star": <Star />,
+    "Favorite": <Favorite />,
+    "Flight": <Flight />,
+    "Lightbulb": <Lightbulb />,
+    "Mood": <Mood />,
+    "AssistantPhoto": <AssistantPhoto />,
+    "Attractions": <Attractions />,
+    "BakeryDining": <BakeryDining />,
+    "BeachAccess": <BeachAccess />,
+    "Business": <Business />,
+    "Cake": <Cake />,
+    "Dining": <Dining />,
+    "DinnerDining": <DinnerDining />,
+    "LocalDining": <LocalDining />,
+    "DirectionsBus": <DirectionsBus />,
+    "DirectionsCar": <DirectionsCar />,
+    "DirectionsWalk": <DirectionsWalk />,
+    "EvStation": <EvStation />,
+    "LocalBar": <LocalBar />,
+    "LocalGroceryStore": <LocalGroceryStore />,
+    "LocalHospital": <LocalHospital />,
+    "LocalMall": <LocalMall />,
+    "LocalMovies": <LocalMovies />,
+  };
+
+const colorMappingTxt = {
+  "red": "text-red-400",
+  "orange": "text-orange-400",
+  "yellow": "text-yellow-400",
+  "green": "text-green-400",
+  "blue": "text-blue-400",
+  "indigo": "text-indigo-400",
+  "purple": "text-purple-400",
+  "pink": "text-pink-400",
+  "rose": "text-rose-400",
+  "amber": "text-amber-400",
+  "lime": "text-lime-400",
+  "teal": "text-teal-400",
+  "cyan": "text-cyan-400",
+  "gray": "text-gray-500",
+};
+
 
 const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_API_KEY
 const GOOGLE_PERSONAL_MAP_ID = process.env.REACT_APP_PERSONAL_MAP_ID
@@ -34,6 +85,8 @@ function MyMap() {
     const [openIconInfo, setOpenIconInfo] = useState(false);
     const [selectedIcon, setSelectedIcon] = useState('');
     const [savedIcons, setSavedIcons] = useState([]);
+    const [iconColor, setIconColor] = useState('Star');
+    const [iconChar, setIconChar] = useState('yellow');
     const [mapCenter, setMapCenter] = useState(null);
     const [selectedLocation, setSelectedLocation] = useState('');
     const [placeName, setPlaceName] = useState('');
@@ -60,6 +113,7 @@ function MyMap() {
                 return;
             }
             setSavedIcons(user.savedIcons);
+            fetchIconSettings();
         }
         verifyUser();
         const geoLocationOptions = {
@@ -112,6 +166,22 @@ function MyMap() {
           }
       })
     }
+
+    /* Fetch global icon settings */
+    const fetchIconSettings = async () => {
+        try {
+            const token = localStorage.getItem("token");
+
+            const categoryRes = await axios.get("http://localhost:3001/api/user/get-category-icon", {
+                headers: { 'x-access-token': `${token}` }
+            });
+
+            setIconChar(categoryRes.data.char || "Star");
+            setIconColor(categoryRes.data.color || "gray");
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    };
 
     const addIcon = async () => {
         /* Sanity checks */
@@ -177,6 +247,13 @@ function MyMap() {
       setOpenIconInfo(true);
       setSelectedIcon(id);
     }
+
+    const getMuiIcon = (iconName) => {
+        return iconMap[iconName] || <Star />;
+    }
+    const getColorClass = (colorName) => {
+        return colorMappingTxt[colorName] || "text-pink-500";
+      };
 
     const handleCameraChange = useCallback((e) => {
         setMapCenter(e.detail.center);
@@ -281,7 +358,7 @@ function MyMap() {
 
     return (currLocation && isLoaded) ? (
       <APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
-
+        <CustomizeIcon />
         <NavigationLayout showHeader={true} headerSearchBar={<SearchBar ref={inputRef}/>} showButton={true} headerSearchButton={<SearchButton />}>
           <div style={{ height: "100vh", width: "100vw" }}>
             <div style={{ height: "75%", width: "75%" }}>
@@ -296,13 +373,24 @@ function MyMap() {
                     >
                     {/* <SavedMarkers 
                         savedIcons={savedIcons} /> */}
-                    {savedIcons && savedIcons.map(icon => (
+                    {/* {savedIcons && savedIcons.map(icon => (
                         <AdvancedMarker
                             key={icon._id}
                             position={icon.position}
                             onClick={() => handleIconClick(icon._id)}
                         >
                             <span style={{fontSize:"2rem"}}>{icon.char}</span>
+                        </AdvancedMarker>
+                    ))} */}
+                    {savedIcons && savedIcons.map(icon => (
+                        <AdvancedMarker
+                            key={icon._id}
+                            position={icon.position}
+                            onClick={() => handleIconClick(icon._id)}
+                        >
+                            <span className={`text-4xl ${colorMappingTxt[icon.color] || "text-gray-500"}`}>
+                                {getMuiIcon(icon.char)}
+                            </span>
                         </AdvancedMarker>
                     ))}
 
