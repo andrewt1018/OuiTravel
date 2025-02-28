@@ -15,6 +15,7 @@ export default function UserProfile() {
   const [userData, setUserData] = useState({});
   const [menuOpen, setMenuOpen] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [profilePic, setProfilePic] = useState(null);
   const navigate = useNavigate();
 
   const handleFollow = () => {
@@ -84,6 +85,19 @@ export default function UserProfile() {
         } else if (user.visibility === "Private") {
           setIsPrivate(true);
         } 
+        if (user.profilePic) {
+          try {
+            const token = localStorage.getItem("token");
+            const response = await axios.get(`http://localhost:3001/api/upload/get-image?id=${user.profilePic}`, {
+                headers: { 'x-access-token': token }
+            });
+            if (response.data && response.data.imageUrl) {
+                setProfilePic(response.data.imageUrl);
+            }
+          } catch (error) {
+              console.error("Error fetching profile image:", error);
+          }
+        }
       } catch (error) {
         alert("User not logged in!");
         navigate('/login');
@@ -101,7 +115,23 @@ export default function UserProfile() {
         <div className="h-96 bg-gradient-to-r from-blue-100 to-indigo-100 p-8 flex items-center gap-8 shadow-md">
           {/* Profile Picture */}
           <div className="w-48 h-48 bg-gray-300 rounded-full flex items-center justify-center shadow-lg">
-            <span className="text-gray-500 text-lg">Profile</span>
+          { profilePic ? 
+            (<img
+                className="h-48 w-48 object-cover rounded-full"
+                src={profilePic}
+                alt="Profile Avatar"
+            />)
+            : (<img
+                className="h-48 w-48 object-contain rounded-full"
+                src={"/default-avatar.png"}
+                alt="Profile Avatar"
+            />)
+          }
+
+            {/* <img 
+              className="h-48 w-48 object-cover rounded-full"
+              src={profilePic || "/selena.jpg"}
+            /> */}
           </div>
           {/* User Info */}
           <div className="flex-1 flex flex-col">

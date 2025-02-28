@@ -95,7 +95,7 @@ const MessageContainer = ({ userId, selectedUser }) => {
         <div className="flex-1 flex flex-col bg-gray-50">
             <div className="p-4 bg-white shadow-md flex items-center">
                 <img
-                src={selectedUser.profilePic || "/selena.jpg"}
+                src={selectedUser.profilePic || "/default-avatar.png"}
                 alt={selectedUser.username}
                 className="w-10 h-10 rounded-full mr-3"
                 />
@@ -122,7 +122,7 @@ const MessageContainer = ({ userId, selectedUser }) => {
                     {msg.senderId !== userId && (
                     <div className="mr-2">
                         <img
-                        src={selectedUser.profilePic || "/selena.jpg"} // Display opponent's avatar or fallback image
+                        src={selectedUser.profilePic || "/default-avatar.png"} 
                         className="w-10 h-10 rounded-full"
                         alt={selectedUser.username}
                         />
