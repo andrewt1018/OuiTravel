@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import {getUser} from "./helpers/user-verification"
+import { getUser } from "./helpers/user-verification";
 import axios from "axios";
 import "./styles/general.css";
 import {
@@ -18,14 +18,9 @@ export default function UserProfile() {
   const [profilePic, setProfilePic] = useState(null);
   const navigate = useNavigate();
 
-  const handleFollow = () => {
-    setIsFollowing(!isFollowing);
-    // backend not implemented
-  };
-
   const handleEditProfile = () => {
-    navigate('/settings');
-  }
+    navigate("/settings");
+  };
 
   const [isPrivate, setIsPrivate] = useState(true);
 
@@ -74,9 +69,9 @@ export default function UserProfile() {
     const verifyUser = async () => {
       const user = await getUser();
       if (!user) {
-          alert("User not logged in!")
-          navigate("/login")
-          return;
+        alert("User not logged in!");
+        navigate("/login");
+        return;
       }
       try {
         setUserData(user);
@@ -84,26 +79,29 @@ export default function UserProfile() {
           setIsPrivate(false);
         } else if (user.visibility === "Private") {
           setIsPrivate(true);
-        } 
+        }
         if (user.profilePic) {
           try {
             const token = localStorage.getItem("token");
-            const response = await axios.get(`http://localhost:3001/api/upload/get-image?id=${user.profilePic}`, {
-                headers: { 'x-access-token': token }
-            });
+            const response = await axios.get(
+              `http://localhost:3001/api/upload/get-image?id=${user.profilePic}`,
+              {
+                headers: { "x-access-token": token },
+              }
+            );
             if (response.data && response.data.imageUrl) {
-                setProfilePic(response.data.imageUrl);
+              setProfilePic(response.data.imageUrl);
             }
           } catch (error) {
-              console.error("Error fetching profile image:", error);
+            console.error("Error fetching profile image:", error);
           }
         }
       } catch (error) {
         alert("User not logged in!");
-        navigate('/login');
+        navigate("/login");
         return;
-;      }
-    }
+      }
+    };
     verifyUser();
   }, []);
 
@@ -115,18 +113,19 @@ export default function UserProfile() {
         <div className="h-96 bg-gradient-to-r from-blue-100 to-indigo-100 p-8 flex items-center gap-8 shadow-md">
           {/* Profile Picture */}
           <div className="w-48 h-48 bg-gray-300 rounded-full flex items-center justify-center shadow-lg">
-          { profilePic ? 
-            (<img
+            {profilePic ? (
+              <img
                 className="h-48 w-48 object-cover rounded-full"
                 src={profilePic}
                 alt="Profile Avatar"
-            />)
-            : (<img
+              />
+            ) : (
+              <img
                 className="h-48 w-48 object-contain rounded-full"
                 src={"/default-avatar.png"}
                 alt="Profile Avatar"
-            />)
-          }
+              />
+            )}
 
             {/* <img 
               className="h-48 w-48 object-cover rounded-full"
@@ -135,7 +134,9 @@ export default function UserProfile() {
           </div>
           {/* User Info */}
           <div className="flex-1 flex flex-col">
-            <h1 className="text-5xl font-bold pb-4">{userData.firstName} {userData.lastName}</h1>
+            <h1 className="text-5xl font-bold pb-4">
+              {userData.firstName} {userData.lastName}
+            </h1>
             <p className="text-2xl text-gray-700">@{userData.username}</p>
             {/* Bio Section */}
             <p className="mt-3 text-lg text-gray-600 max-w-lg leading-relaxed">
@@ -156,12 +157,6 @@ export default function UserProfile() {
                 </strong>
                 <span>Following</span>
               </div>
-              {/* <button
-                className="mt-2 px-3 py-1 text-lg text-gray-600 border border-gray-400 rounded-md hover:bg-gray-100 transition"
-                onClick={handleFollow}
-              >
-                {isFollowing ? "Following" : "Follow"}
-              </button> */}
             </div>
           </div>
           {/* Options Button */}
