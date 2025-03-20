@@ -1,4 +1,4 @@
-//DON"T USE THIS ANYMORE
+//DON"T USE THIS ANYMORE, USE UserProfile.js
 
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";

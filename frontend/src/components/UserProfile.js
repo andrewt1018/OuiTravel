@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-
+import FollowingListModal from "./FollowingListModal"; // Import the modal component
 import axios from "axios";
 import { getUser } from "./helpers/user-verification";
 import "./styles/general.css";
@@ -45,6 +45,24 @@ export default function UserProfile() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [menuOpen]);
+
+  const [isFollowingModalOpen, setIsFollowingModalOpen] = useState(false); // States for the modal
+  const [followingList, setFollowingList] = useState([]);
+
+  const handleOpenFollowing = async () => {
+    // To view the list of following
+    try {
+      const res = await axios.get(
+        `http://localhost:3001/api/profile/${username}`
+      );
+
+      // Assuming res.data contains the followingList
+      setFollowingList(res.data.followingList);
+      setIsFollowingModalOpen(true);
+    } catch (error) {
+      console.error("Error fetching following list:", error);
+    }
+  };
 
   const handleFollow = async () => {
     try {
@@ -227,10 +245,21 @@ export default function UserProfile() {
               <strong className="text-gray-900">{followerCount}</strong>
               <span>Followers</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div
+              className="flex items-center gap-2 cursor-pointer hover:underline"
+              onClick={handleOpenFollowing}
+            >
               <strong className="text-gray-900">{followingCount}</strong>
               <span>Following</span>
             </div>
+            {/* Modal should be rendered conditionally */}
+            {isFollowingModalOpen && (
+              <FollowingListModal
+                isOpen={isFollowingModalOpen}
+                onClose={() => setIsFollowingModalOpen(false)}
+                followingList={followingList}
+              />
+            )}
 
             {!isOwnProfile && (
               <button
@@ -267,9 +296,6 @@ export default function UserProfile() {
               onClick={handleEditProfile}
             >
               Edit Profile
-            </button>
-            <button className="block w-full text-left p-2 hover:bg-gray-100 rounded">
-              View Profile as Public
             </button>
             <FormGroup>
               <Box display="flex" alignItems="center">
