@@ -48,6 +48,8 @@ const Header = ({ children }) => {
       {children}
       <div className="flex-1 flex justify-end">
         <Link to={`/profile/${user?.username}`}>
+          {" "}
+          {/* Don't change the profile link */}
           <Avatar
             src={profilePic}
             alt={user?.username || "Profile"}
