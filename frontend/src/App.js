@@ -105,7 +105,7 @@ function App() {
           path="/profile/:username"
           element={
             <NavigationLayout showHeader={false}>
-              <UserProfile key={window.location.pathname} />
+              <UserProfile />
             </NavigationLayout>
           }
         />

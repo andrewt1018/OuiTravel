@@ -118,7 +118,7 @@ function FollowingList({ followingList, onClose }) {
           ))
         )
       ) : (
-        <div>You have no following</div>
+        <div>Following no one</div>
       )}
     </div>
   );
