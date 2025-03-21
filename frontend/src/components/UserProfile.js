@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import FollowingListModal from "./FollowingListModal"; // Import the modal component
 import axios from "axios";
@@ -15,6 +16,7 @@ import {
 
 export default function UserProfile() {
   const { username } = useParams(); // Get username from URL
+  console.log("Current username param:", username);
   const [userData, setUserData] = useState({});
   const [followingCount, setFollowingCount] = useState(0);
   const [followerCount, setFollowerCount] = useState(0);
@@ -26,6 +28,7 @@ export default function UserProfile() {
   const [profilePic, setProfilePic] = useState(null);
   const navigate = useNavigate();
   const [isOwnProfile, setIsOwnProfile] = useState(false); // To differentiate between checking my own profile or checking others' profile
+  const [key, setKey] = useState(0);
 
   const menuRef = useRef(null);
   useEffect(() => {
@@ -48,6 +51,7 @@ export default function UserProfile() {
 
   const [isFollowingModalOpen, setIsFollowingModalOpen] = useState(false); // States for the modal
   const [followingList, setFollowingList] = useState([]);
+  const location = useLocation();
 
   const handleOpenFollowing = async () => {
     // To view the list of following
@@ -208,6 +212,10 @@ export default function UserProfile() {
       }
     }
     fetchUserProfile();
+  }, [username, key]);
+
+  useEffect(() => {
+    setKey((prev) => prev + 1);
   }, [username]);
 
   return (

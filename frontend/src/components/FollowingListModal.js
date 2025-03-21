@@ -1,5 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { getUser } from "./helpers/user-verification";
+import "./styles/general.css";
 
 export default function FollowingListModal({ isOpen, onClose, followingList }) {
   if (!isOpen) return null; // Prevent rendering when modal is closed
@@ -15,15 +19,16 @@ export default function FollowingListModal({ isOpen, onClose, followingList }) {
           >
             ✖
           </button>
-          <FollowingList followingList={followingList} />
+          <FollowingList followingList={followingList} onClose={onClose} />
         </div>
       </div>
     </>
   );
 }
 
-function FollowingList({ followingList }) {
+function FollowingList({ followingList, onClose }) {
   const [usersData, setUsersData] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchUsersData() {
@@ -77,6 +82,11 @@ function FollowingList({ followingList }) {
     }
   }, [followingList]);
 
+  const handleUserClick = (username) => {
+    window.location.href = `/profile/${username}`; // Navigate to user profile
+    onClose();
+  };
+
   return (
     <div className="max-h-80 overflow-y-auto">
       {followingList.length > 0 ? (
@@ -91,6 +101,8 @@ function FollowingList({ followingList }) {
                 alignItems: "center",
                 marginBottom: "10px",
               }}
+              className="flex items-center mb-3 cursor-pointer p-2 hover:bg-gray-100 rounded-lg"
+              onClick={() => handleUserClick(user.username)}
             >
               <img
                 src={user.profilePic || "/default-avatar.png"}
@@ -106,7 +118,7 @@ function FollowingList({ followingList }) {
           ))
         )
       ) : (
-        <div>No Following</div>
+        <div>You have no following</div>
       )}
     </div>
   );
