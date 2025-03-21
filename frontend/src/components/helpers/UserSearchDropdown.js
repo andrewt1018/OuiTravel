@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import {getUser} from "./user-verification"
+import { getUser } from "./user-verification";
 
 const UserSearchDropdown = ({ query, setQuery }) => {
   const navigate = useNavigate(); // Hook for navigation
@@ -12,24 +12,25 @@ const UserSearchDropdown = ({ query, setQuery }) => {
 
   // Fetch the logged-in user's data
   useEffect(() => {
-      const verifyUser = async () => {
-          try {
-              const user = await getUser();
-              if (!user) {
-                  navigate("/login");
-                  return;
-              }
-              setLoggedInUsername(user.username); // Set the username in state
-          } catch (error) {
-              console.error("Error verifying user:", error);
-          }
+    const verifyUser = async () => {
+      try {
+        const user = await getUser();
+        if (!user) {
+          navigate("/login");
+          return;
+        }
+        setLoggedInUsername(user.username); // Set the username in state
+      } catch (error) {
+        console.error("Error verifying user:", error);
       }
-      verifyUser();
+    };
+    verifyUser();
   }, []);
 
   useEffect(() => {
     if (query.length === 0) {
       setResults([]);
+      setShowDropdown(false);
       return;
     }
 
@@ -58,18 +59,23 @@ const UserSearchDropdown = ({ query, setQuery }) => {
   };
 
   return (
-    showDropdown &&
-    results.length > 0 && (
+    showDropdown && (
       <div className="relative w-full bg-white border border-gray-300 rounded-md mt-1 shadow-lg">
-        {results.map((user) => (
-          <button
-            key={user._id}
-            className="w-full text-left px-4 py-2 hover:bg-gray-100"
-            onMouseDown={() => handleSelect(user.username)}
-          >
-            {user.username}
-          </button>
-        ))}
+        {results.length > 0 ? (
+          results.map((user) => (
+            <button
+              key={user._id}
+              className="w-full text-left px-4 py-2 hover:bg-gray-100"
+              onMouseDown={() => handleSelect(user.username)}
+            >
+              {user.username}
+            </button>
+          ))
+        ) : results.length === 0 && query.length > 0 ? (
+          <div className="w-full text-center px-4 py-2 text-gray-500">
+            No users found
+          </div>
+        ) : null}
       </div>
     )
   );
