@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import FollowingListModal from "./FollowingListModal"; // Import the modal component
+import FollowerListModal from "./FollowerListModal"; // Import the modal component
 import axios from "axios";
 import { getUser } from "./helpers/user-verification";
 import "./styles/general.css";
@@ -48,8 +49,11 @@ export default function UserProfile() {
     };
   }, [menuOpen]);
 
-  const [isFollowingModalOpen, setIsFollowingModalOpen] = useState(false); // States for the modal
+  const [isFollowingModalOpen, setIsFollowingModalOpen] = useState(false); // States for the following modal
   const [followingList, setFollowingList] = useState([]);
+
+  const [isFollowerModalOpen, setIsFollowerModalOpen] = useState(false); // States for the follower modal
+  const [followerList, setFollowerList] = useState([]);
 
   const handleOpenFollowing = async () => {
     // To view the list of following
@@ -61,6 +65,21 @@ export default function UserProfile() {
       // Assuming res.data contains the followingList
       setFollowingList(res.data.followingList);
       setIsFollowingModalOpen(true);
+    } catch (error) {
+      console.error("Error fetching following list:", error);
+    }
+  };
+
+  const handleOpenFollower = async () => {
+    // To view the list of followers
+    try {
+      const res = await axios.get(
+        `http://localhost:3001/api/profile/${username}`
+      );
+
+      // Assuming res.data contains the followerList
+      setFollowerList(res.data.followerList);
+      setIsFollowerModalOpen(true);
     } catch (error) {
       console.error("Error fetching following list:", error);
     }
@@ -243,12 +262,31 @@ export default function UserProfile() {
           </p>
           {/* Followers & Following */}
           <div className="flex gap-6 mt-4 text-lg text-gray-600">
-            <div className="flex items-center gap-2">
+            <div
+              className={`flex items-center gap-2 cursor-pointer hover:underline ${
+                isPrivate && !isFollowing && !isOwnProfile
+                  ? "pointer-events-none"
+                  : ""
+              }`}
+              onClick={handleOpenFollower}
+            >
               <strong className="text-gray-900">{followerCount}</strong>
               <span>Followers</span>
             </div>
+            {/* Modal should be rendered conditionally */}
+            {isFollowerModalOpen && (
+              <FollowerListModal
+                isOpen={isFollowerModalOpen}
+                onClose={() => setIsFollowerModalOpen(false)}
+                followerList={followerList}
+              />
+            )}
             <div
-              className="flex items-center gap-2 cursor-pointer hover:underline"
+              className={`flex items-center gap-2 cursor-pointer hover:underline ${
+                isPrivate && !isFollowing && !isOwnProfile
+                  ? "pointer-events-none"
+                  : ""
+              }`}
               onClick={handleOpenFollowing}
             >
               <strong className="text-gray-900">{followingCount}</strong>
